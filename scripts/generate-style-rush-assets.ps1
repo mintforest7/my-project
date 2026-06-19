@@ -200,25 +200,25 @@ function Draw-BaseBodysuit() {
   $main = Brush "#f7b8cc"; $shade = Brush "#df8faf"; $hi = Brush "#fff0f6"; $line = Pen "#bd6e8d" 2
 
   $suit = Path-Body @(
-    (New-Object Drawing.PointF 186,188), (New-Object Drawing.PointF 234,188),
-    (New-Object Drawing.PointF 252,214), (New-Object Drawing.PointF 252,286),
-    (New-Object Drawing.PointF 236,326), (New-Object Drawing.PointF 258,368),
+    (New-Object Drawing.PointF 182,188), (New-Object Drawing.PointF 238,188),
+    (New-Object Drawing.PointF 258,214), (New-Object Drawing.PointF 256,286),
+    (New-Object Drawing.PointF 240,326), (New-Object Drawing.PointF 258,368),
     (New-Object Drawing.PointF 248,408), (New-Object Drawing.PointF 226,424),
     (New-Object Drawing.PointF 210,430), (New-Object Drawing.PointF 198,424),
     (New-Object Drawing.PointF 172,408), (New-Object Drawing.PointF 162,368),
-    (New-Object Drawing.PointF 184,326),
-    (New-Object Drawing.PointF 168,286),
-    (New-Object Drawing.PointF 168,214)
+    (New-Object Drawing.PointF 180,326),
+    (New-Object Drawing.PointF 164,286),
+    (New-Object Drawing.PointF 162,214)
   )
   $g.FillPath($main, $suit)
   $g.DrawPath($line, $suit)
 
-  $g.DrawArc((Pen "#fff6fa" 3), 180, 188, 60, 36, 15, 150)
-  $g.DrawLine((Pen "#fff6fa" 2), 178, 220, 184, 312)
-  $g.DrawLine((Pen "#fff6fa" 2), 242, 220, 236, 312)
+  $g.DrawArc((Pen "#fff6fa" 3), 176, 188, 68, 36, 15, 150)
+  $g.DrawLine((Pen "#fff6fa" 2), 174, 220, 180, 312)
+  $g.DrawLine((Pen "#fff6fa" 2), 246, 220, 240, 312)
   $g.DrawLine((Pen "#cf7f9e" 2), 174, 406, 210, 426)
   $g.DrawLine((Pen "#cf7f9e" 2), 246, 406, 210, 426)
-  Fill-Rounded $g $shade 184 318 52 14 5
+  Fill-Rounded $g $shade 180 318 60 14 5
   $g.FillEllipse($hi, 198, 205, 24, 10)
 
   Save-Layer $bmp $g (Join-Path $root "body/bodysuit.png")
