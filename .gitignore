@@ -1,0 +1,17 @@
+node_modules
+dist
+dist-ssr
+*.local
+.env
+.env.local
+.DS_Store
+*.log
+.vercel
+supabase/.temp
+supabase/.branches
+*.tsbuildinfo
+vite.config.js
+vite.config.d.ts
+__pycache__/
+*.py[cod]
+style_rush/save_data.json
