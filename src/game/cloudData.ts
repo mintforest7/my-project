@@ -1,6 +1,6 @@
 import type { User } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
-import type { ClothingItem, Outfit, PlayerData } from './types';
+import type { Category, ClothingItem, Outfit, PlayerData } from './types';
 import { defaultPlayer } from './playerData';
 
 type UserRow = {
@@ -17,9 +17,30 @@ type OwnedItemRow = {
   item_id: string;
 };
 
+type SavedOutfitRow = {
+  id: string;
+  outfit_name: string;
+  hair: string | null;
+  bangs: string | null;
+  makeup: string | null;
+  top: string | null;
+  bottom: string | null;
+  dress: string | null;
+  shoes: string | null;
+  accessories: string | null;
+  created_at: string;
+};
+
 export type SavedOutfitDraft = {
   name: string;
   outfit: Outfit;
+};
+
+export type SavedOutfit = {
+  id: string;
+  name: string;
+  itemIds: Partial<Record<Category, string>>;
+  createdAt: string;
 };
 
 export async function loadCloudPlayer(user: User, starterItemIds: readonly string[]): Promise<PlayerData> {
@@ -68,7 +89,17 @@ export async function saveOwnedItem(itemId: string): Promise<void> {
   if (error) throw error;
 }
 
-export async function saveOutfit(draft: SavedOutfitDraft): Promise<void> {
+export async function loadSavedOutfits(): Promise<SavedOutfit[]> {
+  const { data, error } = await supabase
+    .from('saved_outfits')
+    .select('id,outfit_name,hair,bangs,makeup,top,bottom,dress,shoes,accessories,created_at')
+    .order('created_at', { ascending: false });
+
+  if (error) throw error;
+  return ((data as SavedOutfitRow[] | null) ?? []).map(rowToSavedOutfit);
+}
+
+export async function saveOutfit(draft: SavedOutfitDraft): Promise<SavedOutfit> {
   const userId = await getCurrentUserId();
   const body = {
     user_id: userId,
@@ -83,8 +114,14 @@ export async function saveOutfit(draft: SavedOutfitDraft): Promise<void> {
     accessories: itemId(draft.outfit.accessories),
   };
 
-  const { error } = await supabase.from('saved_outfits').insert(body);
+  const { data, error } = await supabase
+    .from('saved_outfits')
+    .insert(body)
+    .select('id,outfit_name,hair,bangs,makeup,top,bottom,dress,shoes,accessories,created_at')
+    .single();
+
   if (error) throw error;
+  return rowToSavedOutfit(data as SavedOutfitRow);
 }
 
 export async function syncClothingCatalog(items: readonly ClothingItem[]): Promise<void> {
@@ -147,4 +184,22 @@ async function getCurrentUserId(): Promise<string> {
 
 function itemId(item: ClothingItem | undefined): string | null {
   return item?.id ?? null;
+}
+
+function rowToSavedOutfit(row: SavedOutfitRow): SavedOutfit {
+  return {
+    id: row.id,
+    name: row.outfit_name,
+    itemIds: {
+      hair: row.hair ?? undefined,
+      bangs: row.bangs ?? undefined,
+      makeup: row.makeup ?? undefined,
+      tops: row.top ?? undefined,
+      bottoms: row.bottom ?? undefined,
+      dresses: row.dress ?? undefined,
+      shoes: row.shoes ?? undefined,
+      accessories: row.accessories ?? undefined,
+    },
+    createdAt: row.created_at,
+  };
 }

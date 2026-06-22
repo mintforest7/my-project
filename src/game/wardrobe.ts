@@ -1,4 +1,6 @@
 import type { Category, ClothingItem, RGB } from './types';
+import { getAssetPlacement } from './assetLayout';
+import { getDefaultLayerIndex } from './layerSystem';
 
 export const categories: readonly Category[] = ['hair', 'bangs', 'makeup', 'tops', 'bottoms', 'dresses', 'shoes', 'accessories'];
 
@@ -27,8 +29,8 @@ const styles: Record<string, StyleDef> = {
     ['korean', 'layered', 'oversized', 'pleated', 'cardigan', 'trendy'],
     [[238, 238, 232], [82, 92, 112], [176, 202, 224], [255, 210, 220]],
     {
-      hair: ['Seoul Soft Waves', 'Airy Layer Cut', 'Cafe Date Ponytail'],
-      bangs: ['Soft Curtain Bangs', 'Rounded Air Bangs', 'Side-Swept Seoul Fringe'],
+      hair: ['Silk Whisper Hair', 'Airy Layer Cut', 'Golden Hour Waves'],
+      bangs: ['Moonlight Curtain Fringe', 'Rounded Air Bangs', 'Korean Style Bangs'],
       makeup: ['Dewy Peach Tint', 'Soft Puppy Liner', 'Glass Skin Glow'],
       tops: ['Moonlight Cardigan', 'Oversized Seoul Hoodie', 'Layered Campus Top'],
       bottoms: ['Cherry Blossom Skirt', 'Wide-Leg Studio Pants', 'Pleated Uniform Skirt'],
@@ -293,7 +295,7 @@ const styles: Record<string, StyleDef> = {
 
 const shapes: Record<Category, readonly string[]> = {
   hair: ['short', 'long', 'buns', 'ponytail', 'braids', 'claw-clip'],
-  bangs: ['straight', 'side-swept', 'curtain', 'rounded', 'heavy-straight', 'wispy', 'layered'],
+  bangs: ['straight', 'side-swept', 'curtain', 'rounded', 'wispy', 'layered', 'korean', 'heavy-straight'],
   makeup: ['glow', 'liner', 'glam', 'goth', 'glow'],
   tops: ['shirt', 'jacket', 'turtleneck', 'mock-neck', 'sweater', 'hoodie', 'cardigan', 'baby-tee', 'blazer', 'corset', 'wrap'],
   bottoms: ['skirt', 'pants', 'shorts', 'cargo', 'wide-leg', 'low-rise', 'pleated', 'plaid'],
@@ -331,6 +333,8 @@ export function buildWardrobe(): ClothingItem[] {
           category,
           color,
           assetPath: `/assets/style-rush/${category}/${shape}.png`,
+          placement: getAssetPlacement(category, shape),
+          layerIndex: getDefaultLayerIndex(category, shape),
           tags: def.tags,
           price,
           levelRequired: premium ? 1 + Math.floor(styleIndex / 5) : 1,

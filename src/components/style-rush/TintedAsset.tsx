@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import type { CSSProperties } from 'react';
 import type { RGB } from '../../game/types';
 
 type TintedAssetProps = {
@@ -6,9 +7,11 @@ type TintedAssetProps = {
   className?: string;
   color?: RGB;
   src: string;
+  style?: CSSProperties;
+  tintMode?: 'recolor' | 'preserve';
 };
 
-export function TintedAsset({ alt, className, color, src }: TintedAssetProps) {
+export function TintedAsset({ alt, className, color, src, style, tintMode = 'recolor' }: TintedAssetProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
   useEffect(() => {
@@ -35,15 +38,21 @@ export function TintedAsset({ alt, className, color, src }: TintedAssetProps) {
 
         const luminance = (frame.data[index] * 0.299 + frame.data[index + 1] * 0.587 + frame.data[index + 2] * 0.114) / 255;
         const shade = 0.34 + luminance * 0.92;
-        frame.data[index] = clamp(color[0] * shade);
-        frame.data[index + 1] = clamp(color[1] * shade);
-        frame.data[index + 2] = clamp(color[2] * shade);
+        if (tintMode === 'preserve') {
+          frame.data[index] = clamp(frame.data[index] * 0.68 + color[0] * shade * 0.32);
+          frame.data[index + 1] = clamp(frame.data[index + 1] * 0.68 + color[1] * shade * 0.32);
+          frame.data[index + 2] = clamp(frame.data[index + 2] * 0.68 + color[2] * shade * 0.32);
+        } else {
+          frame.data[index] = clamp(color[0] * shade);
+          frame.data[index + 1] = clamp(color[1] * shade);
+          frame.data[index + 2] = clamp(color[2] * shade);
+        }
       }
       context.putImageData(frame, 0, 0);
     };
   }, [color, src]);
 
-  return <canvas aria-label={alt} className={className} ref={canvasRef} role="img" />;
+  return <canvas aria-label={alt} className={className} ref={canvasRef} role="img" style={style} />;
 }
 
 function clamp(value: number): number {
