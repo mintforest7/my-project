@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type { User } from '@supabase/supabase-js';
 import { addRewards, defaultPlayer } from '../../game/playerData';
 import { loadCloudPlayer, loadSavedOutfits, saveCloudPlayer, saveOutfit, saveOwnedItem } from '../../game/cloudData';
@@ -31,6 +31,97 @@ const studioPalette: readonly RGB[] = [
   [255, 238, 92],
 ];
 
+const progressionLevels = [
+  { name: 'Beginner Style', points: 0 },
+  { name: 'Stylish Dreamer', points: 100 },
+  { name: 'Fashion Star', points: 250 },
+  { name: 'Trend Icon', points: 450 },
+  { name: 'Luxury Model', points: 700 },
+] as const;
+
+const themeGuides: Record<string, { meaning: string; styling: string }> = {
+  'Y2K': {
+    meaning: 'Y2K is a playful early-2000s style with glossy colors, baby tees, low-rise shapes and chunky details.',
+    styling: 'Use pink, silver, denim, platform shoes, cute bags and shiny accessories.',
+  },
+  'Korean Fashion': {
+    meaning: 'Korean Fashion is clean, trendy and layered, with soft colors and a polished Seoul streetwear feeling.',
+    styling: 'Try cardigans, pleated skirts, oversized tops, soft sneakers and neat hair.',
+  },
+  Coquette: {
+    meaning: 'Coquette is romantic and delicate: bows, lace, ribbons, soft pinks and doll-like sweetness.',
+    styling: 'Add frills, pastel colors, ballet details, a cute bag and feminine shoes.',
+  },
+  'Old Money': {
+    meaning: 'Old Money means quiet luxury: elegant, classic, expensive-looking pieces without loud logos.',
+    styling: 'Choose neutral colors, loafers, blazers, pearls, clean hair and tailored shapes.',
+  },
+  'Clean Girl': {
+    meaning: 'Clean Girl is minimal, fresh and polished, with simple basics and a glossy neat look.',
+    styling: 'Use beige, white, soft denim, sleek hair, tiny accessories and simple shoes.',
+  },
+  Streetwear: {
+    meaning: 'Streetwear is casual, bold and city-inspired, built around oversized pieces and statement sneakers.',
+    styling: 'Use graphic tops, denim, cargo pants, dark colors, chunky shoes and strong accessories.',
+  },
+  'Soft Girl': {
+    meaning: 'Soft Girl is cute, pastel and gentle, with hearts, flowers and sweet cozy pieces.',
+    styling: 'Choose pink, blue, yellow, soft skirts, cute shoes and playful bags.',
+  },
+  'Dark Academia': {
+    meaning: 'Dark Academia is inspired by libraries, old schools, books and vintage scholar fashion.',
+    styling: 'Use brown, black, plaid, pleats, loafers and elegant serious details.',
+  },
+  'Light Academia': {
+    meaning: 'Light Academia is the soft, bright version of scholar style with cream colors and gentle classics.',
+    styling: 'Try ivory, beige, pleated skirts, soft knits, loafers and delicate accessories.',
+  },
+  Grunge: {
+    meaning: 'Grunge is messy, edgy and rebellious, with dark colors, distressed pieces and heavy shoes.',
+    styling: 'Use black, plaid, denim, boots and less perfect, more dramatic combinations.',
+  },
+  Fairycore: {
+    meaning: 'Fairycore is magical and nature-inspired, like an enchanted forest outfit.',
+    styling: 'Use soft greens, lavender, florals, tulle, delicate hair and dreamy accessories.',
+  },
+  Cottagecore: {
+    meaning: 'Cottagecore feels like countryside romance: floral, soft, natural and picnic-ready.',
+    styling: 'Use lace, puff sleeves, soft skirts, floral prints, warm colors and gentle bags.',
+  },
+  'Cyber Y2K': {
+    meaning: 'Cyber Y2K mixes early-2000s fashion with futuristic tech energy.',
+    styling: 'Use metallic colors, black, neon, glossy pieces and bold modern accessories.',
+  },
+  Balletcore: {
+    meaning: 'Balletcore is inspired by ballerina practice clothes: ribbons, tulle and soft elegance.',
+    styling: 'Use wrap tops, pale pink, cream, delicate skirts, ribbons and graceful shoes.',
+  },
+  'K-Pop Idol': {
+    meaning: 'K-Pop Idol style is stage-ready, coordinated, sparkly and expressive.',
+    styling: 'Use bold colors, cute details, statement shoes and accessories that look performance-ready.',
+  },
+  Preppy: {
+    meaning: 'Preppy is polished school-club style: classic, neat and sporty-elegant.',
+    styling: 'Use pleated skirts, polos, navy, cream, loafers and clean accessories.',
+  },
+  Gyaru: {
+    meaning: 'Gyaru is bold, glam and expressive, with dramatic cute energy and confident styling.',
+    styling: 'Use mini silhouettes, warm colors, strong shoes, glossy hair and eye-catching details.',
+  },
+  Harajuku: {
+    meaning: 'Harajuku is colorful, maximal and playful, made for creative combinations.',
+    styling: 'Layer bright colors, cute pieces, fun shoes and accessories that feel unique.',
+  },
+  Goth: {
+    meaning: 'Goth is dark, dramatic and elegant, with black clothing, lace and stronger details.',
+    styling: 'Use black, deep red, boots, dark bags, lace and dramatic accessories.',
+  },
+  'Casual Everyday': {
+    meaning: 'Casual Everyday is comfortable but still cute and styled, like a polished daily outfit.',
+    styling: 'Use denim, simple tops, sneakers, soft bags and colors that match cleanly.',
+  },
+};
+
 type StyleRushGameProps = {
   user: User;
 };
@@ -56,6 +147,11 @@ export function StyleRushGame({ user }: StyleRushGameProps) {
   const [finalScore, setFinalScore] = useState(0);
   const [lastRewards, setLastRewards] = useState({ coins: 0, xp: 0 });
   const [debugLayers, setDebugLayers] = useState(false);
+  const [isFinishingRound, setIsFinishingRound] = useState(false);
+  const [savingOutfit, setSavingOutfit] = useState(false);
+  const [buyingItemId, setBuyingItemId] = useState<string | null>(null);
+  const [showThemeInfo, setShowThemeInfo] = useState(false);
+  const finishRoundLock = useRef(false);
 
   useEffect(() => {
     let active = true;
@@ -125,6 +221,12 @@ export function StyleRushGame({ user }: StyleRushGameProps) {
   const selectedItems = wardrobe.filter((item) => item.category === category);
   const shopItems = wardrobe.filter((item) => item.price > 0);
   const xpNeeded = player.level * 100;
+  const stylePoints = (player.level - 1) * 100 + player.xp;
+  const currentProgression = getProgressionLevel(stylePoints);
+  const themeGuide = themeGuides[theme.name] ?? {
+    meaning: 'This theme has its own mood, color palette and styling rules.',
+    styling: 'Match the colors, choose fitting clothes, and add details that support the theme.',
+  };
   const effectiveOutfit = useMemo(() => applyColorOverrides(outfit, colorOverrides), [colorOverrides, outfit]);
   const selectedOutfitItem = outfit[category];
 
@@ -138,6 +240,8 @@ export function StyleRushGame({ user }: StyleRushGameProps) {
     setJuryStatus('Waiting for the runway lights...');
     setFinalScore(0);
     setLastRewards({ coins: 0, xp: 0 });
+    setIsFinishingRound(false);
+    finishRoundLock.current = false;
     setScreen('customize');
   }
 
@@ -160,26 +264,35 @@ export function StyleRushGame({ user }: StyleRushGameProps) {
   }
 
   async function finishRound(): Promise<void> {
+    if (finishRoundLock.current) return;
+
+    finishRoundLock.current = true;
+    setIsFinishingRound(true);
     setScreen('jury');
     setJuryResult(null);
     setJuryStatus('Fashion AI Jury is studying every color, shoe, hairstyle, and accessory...');
 
-    const result = await evaluateFashionJury(theme, effectiveOutfit, player.skinTone);
-    const scoreOutOf100 = Math.round(result.averageScore * 10);
-    const rewards = addRewards(player, scoreOutOf100);
+    try {
+      const result = await evaluateFashionJury(theme, effectiveOutfit, player.skinTone);
+      const scoreOutOf100 = Math.round(result.averageScore * 10);
+      const rewards = addRewards(player, scoreOutOf100);
 
-    setFinalScore(scoreOutOf100);
-    setJuryResult(result);
-    setLastRewards({ coins: rewards.coins, xp: rewards.xp });
-    setPlayer(rewards.player);
-    setJuryStatus(result.source === 'ai' ? 'Live AI verdict complete.' : 'AI is offline, so the local fashion jury scored this look.');
+      setFinalScore(scoreOutOf100);
+      setJuryResult(result);
+      setLastRewards({ coins: rewards.coins, xp: rewards.xp });
+      setPlayer(rewards.player);
+      setJuryStatus(result.source === 'ai' ? 'Live AI verdict complete.' : 'AI is offline, so the local fashion jury scored this look.');
+    } finally {
+      setIsFinishingRound(false);
+    }
   }
 
   async function buyItem(itemId: string): Promise<void> {
     const item = wardrobe.find((candidate) => candidate.id === itemId);
-    if (!item || player.unlockedItemIds.includes(item.id) || player.coins < item.price || player.level < item.levelRequired) return;
+    if (!item || buyingItemId || player.unlockedItemIds.includes(item.id) || player.coins < item.price || player.level < item.levelRequired) return;
 
     try {
+      setBuyingItemId(item.id);
       await saveOwnedItem(item.id);
       setPlayer((current) => ({
         ...current,
@@ -189,6 +302,8 @@ export function StyleRushGame({ user }: StyleRushGameProps) {
       setCloudMessage(`${item.name} saved to inventory.`);
     } catch (error) {
       setCloudMessage(error instanceof Error ? error.message : 'Could not save purchase.');
+    } finally {
+      setBuyingItemId(null);
     }
   }
 
@@ -205,12 +320,17 @@ export function StyleRushGame({ user }: StyleRushGameProps) {
   }
 
   async function handleSaveOutfit(): Promise<void> {
+    if (savingOutfit) return;
+
     try {
+      setSavingOutfit(true);
       const saved = await saveOutfit({ name: `${theme.name} Look`, outfit: effectiveOutfit });
       setSavedOutfits((current) => [saved, ...current.filter((look) => look.id !== saved.id)]);
       setCloudMessage('Outfit saved to cloud.');
     } catch (error) {
       setCloudMessage(error instanceof Error ? error.message : 'Could not save outfit.');
+    } finally {
+      setSavingOutfit(false);
     }
   }
 
@@ -254,9 +374,23 @@ export function StyleRushGame({ user }: StyleRushGameProps) {
             <p className="eyebrow">3-minute outfit battles</p>
             <h1>Style Rush</h1>
             <p className="lead">Spin a theme, build a look, impress the AI judges, and unlock a bigger wardrobe.</p>
+            <div className="menu-progress-card">
+              <div className="progression-pill">
+                <span>{currentProgression.name}</span>
+                <small>{stylePoints} style points</small>
+              </div>
+              <div className="progression-levels" aria-label="Style progression levels">
+                {progressionLevels.map((level) => (
+                  <span className={level.name === currentProgression.name ? 'active' : ''} key={level.name}>
+                    {level.name}
+                    <small>{level.points}+ pts</small>
+                  </span>
+                ))}
+              </div>
+            </div>
             <div className="button-row">
-              <button onClick={startRound}>Play</button>
-              <button className="secondary" onClick={() => setScreen('shop')}>Shop</button>
+              <button disabled={!cloudReady} onClick={startRound}>{cloudReady ? 'Play' : 'Loading...'}</button>
+              <button className="secondary" disabled={!cloudReady} onClick={() => setScreen('shop')}>Shop</button>
               <button className="quiet" onClick={() => setScreen('settings')}>Settings</button>
             </div>
           </div>
@@ -268,8 +402,38 @@ export function StyleRushGame({ user }: StyleRushGameProps) {
         <section className="game-layout">
           <aside className="wardrobe-panel">
             <p className="eyebrow">Theme</p>
-            <h2>{theme.name}</h2>
+            <div className="theme-title-row">
+              <h2>{theme.name}</h2>
+              <button
+                aria-expanded={showThemeInfo}
+                aria-label="Open theme description"
+                className="theme-help-button"
+                onClick={() => setShowThemeInfo((current) => !current)}
+                type="button"
+              >
+                ?
+              </button>
+            </div>
             <p className="theme-prompt">{theme.prompt}</p>
+            <div className="progression-pill">
+              <span>{currentProgression.name}</span>
+              <small>{stylePoints} style points</small>
+            </div>
+            {showThemeInfo && (
+              <div className="theme-info-card compact">
+                <h2>{theme.name}</h2>
+                <p>{themeGuide.meaning}</p>
+                <p>{themeGuide.styling}</p>
+                <div className="progression-levels" aria-label="Style progression levels">
+                  {progressionLevels.map((level) => (
+                    <span className={level.name === currentProgression.name ? 'active' : ''} key={level.name}>
+                      {level.name}
+                      <small>{level.points}+ pts</small>
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
             {savedOutfits.length > 0 && (
               <div className="saved-outfits-panel">
                 <div>
@@ -365,7 +529,7 @@ export function StyleRushGame({ user }: StyleRushGameProps) {
             <LayeredCharacter colorOverrides={colorOverrides} debugLayers={debugLayers} outfit={outfit} skinTone={player.skinTone} />
             <div className="button-row">
               <button className="secondary" onClick={() => setScreen('preview')}>Preview</button>
-              <button onClick={() => void finishRound()}>Submit</button>
+              <button disabled={isFinishingRound} onClick={() => void finishRound()}>{isFinishingRound ? 'Submitting...' : 'Submit'}</button>
             </div>
           </section>
         </section>
@@ -378,8 +542,8 @@ export function StyleRushGame({ user }: StyleRushGameProps) {
           <LayeredCharacter colorOverrides={colorOverrides} debugLayers={debugLayers} outfit={outfit} skinTone={player.skinTone} />
           <div className="button-row">
             <button className="secondary" onClick={() => setScreen('customize')}>Back</button>
-            <button className="secondary" onClick={handleSaveOutfit}>Save Outfit</button>
-            <button onClick={() => void finishRound()}>Submit</button>
+            <button className="secondary" disabled={savingOutfit} onClick={handleSaveOutfit}>{savingOutfit ? 'Saving...' : 'Save Outfit'}</button>
+            <button disabled={isFinishingRound} onClick={() => void finishRound()}>{isFinishingRound ? 'Submitting...' : 'Submit'}</button>
           </div>
         </section>
       )}
@@ -431,7 +595,7 @@ export function StyleRushGame({ user }: StyleRushGameProps) {
                 </div>
                 <div className="button-row">
                   <button onClick={startRound}>Play Again</button>
-                  <button className="secondary" onClick={handleSaveOutfit}>Save Outfit</button>
+                  <button className="secondary" disabled={savingOutfit} onClick={handleSaveOutfit}>{savingOutfit ? 'Saving...' : 'Save Outfit'}</button>
                   <button className="secondary" onClick={() => setScreen('shop')}>Shop</button>
                 </div>
               </>
@@ -461,13 +625,13 @@ export function StyleRushGame({ user }: StyleRushGameProps) {
               const lockedByLevel = player.level < item.levelRequired;
               const canBuy = !owned && !lockedByLevel && player.coins >= item.price;
               return (
-                <button className={owned ? 'shop-card owned premium' : 'shop-card premium'} disabled={!canBuy} key={item.id} onClick={() => buyItem(item.id)}>
+                <button className={owned ? 'shop-card owned premium' : 'shop-card premium'} disabled={!canBuy || buyingItemId === item.id} key={item.id} onClick={() => buyItem(item.id)}>
                   <span className="item-preview shop-preview">
                     <TintedAsset alt={item.name} color={item.color} src={item.assetPath} tintMode="preserve" />
                   </span>
                   <span className="swatch" style={{ background: rgb(item.color) }} />
                   <strong>{item.name}</strong>
-                  <small>{owned ? 'Owned' : `${item.price} coins - L${item.levelRequired}`}</small>
+                  <small>{buyingItemId === item.id ? 'Buying...' : owned ? 'Owned' : `${item.price} coins - L${item.levelRequired}`}</small>
                 </button>
               );
             })}
@@ -505,6 +669,10 @@ export function StyleRushGame({ user }: StyleRushGameProps) {
 
 function rgb(color: readonly [number, number, number]): string {
   return `rgb(${color[0]} ${color[1]} ${color[2]})`;
+}
+
+function getProgressionLevel(points: number): (typeof progressionLevels)[number] {
+  return progressionLevels.reduce((current, level) => (points >= level.points ? level : current), progressionLevels[0]);
 }
 
 function applyColorOverrides(outfit: Outfit, colorOverrides: Partial<Record<Category, RGB>>): Outfit {

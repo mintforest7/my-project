@@ -2,21 +2,9 @@ import { supabase } from '../lib/supabase';
 import type { Category, FashionJudgeId, FashionJudgeResult, FashionJuryResult, FashionLevel, Outfit, RGB, Theme } from './types';
 
 const judgeProfiles: readonly Omit<FashionJudgeResult, 'score' | 'summary' | 'highlights' | 'concerns' | 'recommendations'>[] = [
-  {
-    id: 'designer',
-    name: 'Fashion Designer AI',
-    role: 'Professional clothing designer',
-  },
-  {
-    id: 'critic',
-    name: 'Style Critic AI',
-    role: 'Magazine fashion critic',
-  },
-  {
-    id: 'trend',
-    name: 'Trend Expert AI',
-    role: 'Modern fashion trends expert',
-  },
+  { id: 'designer', name: 'Fashion Designer AI', role: 'Professional clothing designer' },
+  { id: 'critic', name: 'Style Critic AI', role: 'Magazine fashion critic' },
+  { id: 'trend', name: 'Trend Expert AI', role: 'Modern fashion trends expert' },
 ];
 
 type AiJudgeDraft = {
@@ -36,7 +24,7 @@ export async function evaluateFashionJury(theme: Theme, outfit: Outfit, skinTone
   const prompt = buildPrompt(theme, outfit, skinTone);
   const system = [
     'You are the AI jury system for a premium mobile fashion game.',
-    'Analyze only the real outfit elements provided by the game: item names, categories, tags, colors, shoes, hair, makeup, and accessories.',
+    'Analyze only the real outfit elements provided by the game: item names, categories, tags, colors, shoes, hair, bags, glasses, and accessories.',
     'Return fresh, specific feedback every time. Do not use generic filler.',
     'Return valid JSON only, with no markdown.',
   ].join(' ');
@@ -47,8 +35,7 @@ export async function evaluateFashionJury(theme: Theme, outfit: Outfit, skinTone
     });
 
     if (error) throw error;
-    const text = readAiText(data);
-    const parsed = parseAiJury(text);
+    const parsed = parseAiJury(readAiText(data));
     return completeResult(parsed.judges, 'ai');
   } catch {
     return buildLocalJury(theme, outfit);
@@ -58,6 +45,8 @@ export async function evaluateFashionJury(theme: Theme, outfit: Outfit, skinTone
 function buildPrompt(theme: Theme, outfit: Outfit, skinTone: RGB): string {
   return JSON.stringify({
     task: 'Score the created fashion character with exactly three different AI judges.',
+    language: 'Russian',
+    scoreScale: '1 to 10',
     theme: {
       name: theme.name,
       prompt: theme.prompt,
@@ -68,41 +57,17 @@ function buildPrompt(theme: Theme, outfit: Outfit, skinTone: RGB): string {
       skinTone: colorLabel(skinTone),
       outfit: outfitSummary(outfit),
     },
-    judges: [
-      {
-        id: 'designer',
-        name: 'Fashion Designer AI',
-        role: 'Professional clothing designer',
-        criteria: ['color combination', 'clothing harmony', 'style', 'accessory quality', 'fashion trend fit'],
-      },
-      {
-        id: 'critic',
-        name: 'Style Critic AI',
-        role: 'Magazine fashion critic',
-        criteria: ['originality', 'individuality', 'expressiveness', 'detail balance', 'premium feeling'],
-      },
-      {
-        id: 'trend',
-        name: 'Trend Expert AI',
-        role: 'Modern fashion trends expert',
-        criteria: ['trend relevance', 'popular color combinations', 'modern clothing', 'visual appeal'],
-      },
-    ],
-    outputRules: {
-      language: 'Russian',
-      scoreScale: '1 to 10',
-      requiredJsonShape: {
-        judges: [
-          {
-            id: 'designer | critic | trend',
-            score: 8,
-            summary: 'short specific comment',
-            highlights: ['specific plus'],
-            concerns: ['specific minus or weak point'],
-            recommendations: ['specific improvement tip'],
-          },
-        ],
-      },
+    requiredJsonShape: {
+      judges: [
+        {
+          id: 'designer | critic | trend',
+          score: 8,
+          summary: 'short specific comment',
+          highlights: ['specific plus'],
+          concerns: ['specific minus or weak point'],
+          recommendations: ['specific improvement tip'],
+        },
+      ],
     },
   });
 }
@@ -138,15 +103,15 @@ function parseAiJury(text: string): AiJuryDraft {
 }
 
 function readJudgeDraft(value: unknown): AiJudgeDraft | null {
-  if (!isRecord(value)) return null;
-  if (!isJudgeId(value.id)) return null;
+  if (!isRecord(value) || !isJudgeId(value.id)) return null;
+
   return {
     id: value.id,
     score: clamp(Math.round(numberOr(value.score, 5)), 1, 10),
-    summary: stringOr(value.summary, 'Образ получил внимательную оценку по выбранным элементам.'),
-    highlights: stringListOr(value.highlights, ['Есть сильная идея в сочетании выбранных вещей.']),
+    summary: stringOr(value.summary, 'Жюри оценило образ по выбранным вещам.'),
+    highlights: stringListOr(value.highlights, ['Есть понятная идея в сочетании выбранных элементов.']),
     concerns: stringListOr(value.concerns, ['Некоторые детали можно связать между собой точнее.']),
-    recommendations: stringListOr(value.recommendations, ['Добавь один акцентный элемент, чтобы образ выглядел завершённее.']),
+    recommendations: stringListOr(value.recommendations, ['Добавь один акцентный элемент, чтобы образ выглядел завершеннее.']),
   };
 }
 
@@ -167,13 +132,13 @@ function completeResult(drafts: readonly AiJudgeDraft[], source: FashionJuryResu
 }
 
 function buildLocalJury(theme: Theme, outfit: Outfit): FashionJuryResult {
-  const items = Object.values(outfit);
+  const items = Object.values(outfit).filter((item): item is NonNullable<typeof item> => Boolean(item));
   const tagMatches = items.reduce((total, item) => total + item.tags.filter((tag) => theme.tags.includes(tag)).length, 0);
   const colorMatches = items.filter((item) => theme.colors.some((color) => colorDistance(item.color, color) < 150)).length;
-  const hasFullBase = Boolean(outfit.dresses || (outfit.tops && outfit.bottoms));
+  const hasFullBase = Boolean(outfit.dresses || outfit.tops || outfit.bottoms);
   const hasShoes = Boolean(outfit.shoes);
-  const hasAccessory = Boolean(outfit.accessories);
-  const hasHairDetail = Boolean(outfit.hair || outfit.bangs);
+  const hasAccessory = Boolean(outfit.bags || outfit.glasses);
+  const hasHairDetail = Boolean(outfit.hair);
   const premiumCount = items.filter((item) => item.price > 0).length;
   const base = clamp(3 + tagMatches * 0.55 + colorMatches * 0.45 + items.length * 0.32 + premiumCount * 0.35, 1, 10);
   const freshness = (Date.now() % 9) / 10;
@@ -184,54 +149,51 @@ function buildLocalJury(theme: Theme, outfit: Outfit): FashionJuryResult {
 
   const mainPiece = outfit.dresses ?? outfit.tops ?? outfit.bottoms;
   const shoe = outfit.shoes;
-  const accessory = outfit.accessories;
+  const accessory = outfit.bags ?? outfit.glasses;
   const hair = outfit.hair;
-  const makeup = outfit.makeup;
 
   return completeResult(
     [
       {
         id: 'designer',
         score: designerScore,
-        summary: `${mainPiece ? mainPiece.name : 'Главная одежда'} задаёт образу направление ${theme.name}, а палитра ${mainPiece ? colorLabel(mainPiece.color) : 'пока требует базы'}.`,
+        summary: `${mainPiece ? mainPiece.name : 'Основная одежда'} задает настроение ${theme.name}. Палитра ${mainPiece ? colorLabel(mainPiece.color) : 'пока требует главного цвета'}.`,
         highlights: [
-          hasFullBase ? `Силуэт собран: ${mainPiece?.name} выглядит как центральная fashion-идея.` : 'Есть стартовая идея, но образу нужна основная одежда.',
-          colorMatches > 1 ? 'Цвета хорошо попадают в тему раунда.' : 'Палитра выделяется, но ей нужен ещё один связующий цвет.',
+          hasFullBase ? `Силуэт собран: ${mainPiece?.name} работает как центральная fashion-идея.` : 'Есть стартовая идея, но образу нужна основная одежда.',
+          colorMatches > 1 ? 'Цвета хорошо попадают в тему раунда.' : 'Палитре нужен еще один связывающий цвет.',
         ],
-        concerns: [
-          hasAccessory ? `${accessory?.name} работает как финальный акцент.` : 'Без аксессуара образ выглядит менее завершённым.',
-        ],
+        concerns: [hasAccessory ? `${accessory?.name} добавляет финальный акцент.` : 'Без аксессуара образ выглядит менее завершенным.'],
         recommendations: [
-          hasAccessory ? `Поддержи ${accessory?.name} похожим оттенком в обуви или макияже.` : 'Попробуй добавить более яркий аксессуар, чтобы сделать образ выразительнее.',
+          hasAccessory
+            ? `Поддержи ${accessory?.name} похожим оттенком в обуви или макияже.`
+            : 'Попробуй добавить более яркий аксессуар, чтобы сделать образ выразительнее.',
         ],
       },
       {
         id: 'critic',
         score: criticScore,
-        summary: `Образ читается как ${theme.name}, особенно через ${itemNames([hair, makeup, mainPiece]).join(', ') || 'выбранные детали'}.`,
+        summary: `Образ читается как ${theme.name}, особенно через ${itemNames([hair, mainPiece, accessory]).join(', ') || 'выбранные детали'}.`,
         highlights: [
-          premiumCount > 0 ? 'Премиальные элементы добавляют ощущение журнальной съёмки.' : 'Идея понятная и аккуратная даже без дорогих деталей.',
-          hasHairDetail ? `${hair?.name ?? 'Причёска'} добавляет персонажу индивидуальность.` : 'Лицо и причёску можно сделать более узнаваемыми.',
+          premiumCount > 0 ? 'Премиальные элементы добавляют ощущение журнальной съемки.' : 'Идея понятная и аккуратная даже без дорогих деталей.',
+          hasHairDetail ? `${hair?.name} добавляет персонажу индивидуальность.` : 'Прическу можно сделать более узнаваемой.',
         ],
-        concerns: [
-          items.length >= 5 ? 'Деталей много, важно удержать баланс между ними.' : 'Недостаточно деталей для сильного runway-эффекта.',
-        ],
+        concerns: [items.length >= 5 ? 'Деталей много, важно удержать баланс между ними.' : 'Не хватает деталей для сильного runway-эффекта.'],
         recommendations: [
-          shoe ? `Цветовая палитра хорошо сочетается, но ${shoe.name} можно усилить более элегантной или контрастной парой.` : 'Добавь обувь, чтобы образ выглядел завершённо с головы до ног.',
+          shoe
+            ? `Цветовая палитра хорошо сочетается, но ${shoe.name} можно усилить более элегантной или контрастной парой.`
+            : 'Добавь обувь, чтобы образ выглядел завершенно с головы до ног.',
         ],
       },
       {
         id: 'trend',
         score: trendScore,
         summary: `${theme.name} выглядит современно благодаря ${itemNames([mainPiece, shoe, accessory]).join(', ') || 'основным элементам образа'}.`,
-        highlights: [
-          colorMatches > 0 ? 'Есть связь с актуальными цветовыми комбинациями темы.' : 'Необычная палитра может стать фишкой, если добавить повтор цвета.',
-        ],
-        concerns: [
-          hasShoes ? `${shoe?.name} влияет на весь вайб образа.` : 'Трендовый образ теряет силу без заметной обуви.',
-        ],
+        highlights: [colorMatches > 0 ? 'Есть связь с актуальными цветовыми сочетаниями темы.' : 'Необычная палитра может стать фишкой, если добавить повтор цвета.'],
+        concerns: [hasShoes ? `${shoe?.name} влияет на весь вайб образа.` : 'Трендовый образ теряет силу без заметной обуви.'],
         recommendations: [
-          hasAccessory ? 'Этот образ выглядит современно. Добавь украшение в близком оттенке для завершённого fashion-эффекта.' : 'Добавь украшение или сумку, чтобы трендовая идея стала заметнее.',
+          hasAccessory
+            ? 'Этот образ выглядит современно. Добавь украшение в близком оттенке для завершенного fashion-эффекта.'
+            : 'Добавь украшение или сумку, чтобы трендовая идея стала заметнее.',
         ],
       },
     ],

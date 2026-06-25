@@ -63,14 +63,13 @@ function buildRenderLayers({
     },
   ];
 
-  addItemLayer(layers, outfit.accessories, colorOverrides.accessories, debugLayers);
+  addItemLayer(layers, outfit.bags, colorOverrides.bags, debugLayers);
   addItemLayer(layers, outfit.hair, colorOverrides.hair, debugLayers);
   addItemLayer(layers, outfit.shoes, colorOverrides.shoes, debugLayers);
   addItemLayer(layers, outfit.bottoms, colorOverrides.bottoms, debugLayers);
   addItemLayer(layers, outfit.tops, colorOverrides.tops, debugLayers);
   addItemLayer(layers, outfit.dresses, colorOverrides.dresses, debugLayers);
-  addItemLayer(layers, outfit.makeup, colorOverrides.makeup, debugLayers);
-  addItemLayer(layers, outfit.bangs, colorOverrides.bangs, debugLayers);
+  addItemLayer(layers, outfit.glasses, colorOverrides.glasses, debugLayers);
 
   return layers;
 }
@@ -92,8 +91,8 @@ function ClothingLayer({ color, debugLayers, item, layerIndex }: { color: RGB; d
   return (
     <TintedAsset
       alt={item.name}
-      className="character-layer fitted-layer"
-      color={color}
+      className={`character-layer fitted-layer${item.category === 'hair' ? ' full-frame-layer' : ''}`}
+      color={item.category === 'hair' || item.category === 'tops' || item.tags.includes('reference-asset') ? undefined : color}
       src={item.assetPath}
       style={{
         ...placementStyle(item.placement),

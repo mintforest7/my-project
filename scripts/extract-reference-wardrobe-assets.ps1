@@ -187,11 +187,6 @@ Export-Doll $source
 
 $assets = @(
   @{ path = "hair/long.png"; crop = Rect 30 80 34 66; dest = Rect 128 -4 164 220 },
-  @{ path = "hair/short.png"; crop = Rect 850 80 42 66; dest = Rect 126 -4 168 220 },
-  @{ path = "hair/buns.png"; crop = Rect 370 80 42 66; dest = Rect 126 -4 168 220 },
-  @{ path = "hair/ponytail.png"; crop = Rect 1016 80 42 66; dest = Rect 126 -4 168 220 },
-  @{ path = "hair/braids.png"; crop = Rect 145 80 36 66; dest = Rect 130 -4 160 220 },
-  @{ path = "hair/claw-clip.png"; crop = Rect 1450 80 42 58; dest = Rect 136 0 148 188 },
 
   @{ path = "bangs/straight.png"; crop = Rect 22 172 42 48; dest = Rect 164 48 92 56 },
   @{ path = "bangs/side-swept.png"; crop = Rect 224 172 42 48; dest = Rect 162 48 96 60 },
@@ -201,19 +196,6 @@ $assets = @(
   @{ path = "bangs/wispy.png"; crop = Rect 378 172 42 48; dest = Rect 164 48 92 60 },
   @{ path = "bangs/layered.png"; crop = Rect 482 172 42 48; dest = Rect 162 48 96 62 },
   @{ path = "bangs/korean.png"; crop = Rect 914 172 42 48; dest = Rect 164 48 92 60 },
-
-  @{ path = "tops/shirt.png"; crop = Rect 368 258 42 62; dest = Rect 156 166 112 126 },
-  @{ path = "tops/jacket.png"; crop = Rect 860 258 42 62; dest = Rect 146 164 128 134 },
-  @{ path = "tops/turtleneck.png"; crop = Rect 1262 258 42 62; dest = Rect 146 164 128 136 },
-  @{ path = "tops/mock-neck.png"; crop = Rect 1074 258 42 62; dest = Rect 150 166 120 132 },
-  @{ path = "tops/sweater.png"; crop = Rect 1128 258 42 62; dest = Rect 150 166 120 132 },
-  @{ path = "tops/hoodie.png"; crop = Rect 424 258 42 62; dest = Rect 148 170 124 124 },
-  @{ path = "tops/cardigan.png"; crop = Rect 482 258 42 62; dest = Rect 148 166 124 132 },
-  @{ path = "tops/baby-tee.png"; crop = Rect 532 258 42 62; dest = Rect 152 170 116 124 },
-  @{ path = "tops/blazer.png"; crop = Rect 1362 258 42 62; dest = Rect 146 164 128 136 },
-  @{ path = "tops/corset.png"; crop = Rect 32 258 42 62; dest = Rect 154 168 112 124 },
-  @{ path = "tops/wrap.png"; crop = Rect 82 258 42 62; dest = Rect 154 168 112 124 },
-  @{ path = "tops/armor.png"; crop = Rect 1424 258 42 62; dest = Rect 146 164 128 136 },
 
   @{ path = "bottoms/skirt.png"; crop = Rect 370 342 50 58; dest = Rect 132 286 156 120 },
   @{ path = "bottoms/pants.png"; crop = Rect 842 342 48 70; dest = Rect 140 292 140 248 },

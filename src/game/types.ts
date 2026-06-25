@@ -1,4 +1,4 @@
-export type Category = 'hair' | 'bangs' | 'makeup' | 'tops' | 'bottoms' | 'dresses' | 'shoes' | 'accessories';
+export type Category = 'hair' | 'tops' | 'bottoms' | 'dresses' | 'shoes' | 'bags' | 'glasses';
 
 export type RGB = readonly [number, number, number];
 

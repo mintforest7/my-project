@@ -2,11 +2,11 @@ import type { Category, ClothingItem, RGB } from './types';
 import { getAssetPlacement } from './assetLayout';
 import { getDefaultLayerIndex } from './layerSystem';
 
-export const categories: readonly Category[] = ['hair', 'bangs', 'makeup', 'tops', 'bottoms', 'dresses', 'shoes', 'accessories'];
+export const categories: readonly Category[] = ['hair', 'tops', 'bottoms', 'dresses', 'shoes', 'bags', 'glasses'];
 
 type StyleDef = {
   colors: readonly RGB[];
-  names: Record<Category, readonly string[]>;
+  names: Record<string, readonly string[]>;
   tags: readonly string[];
 };
 
@@ -293,37 +293,178 @@ const styles: Record<string, StyleDef> = {
   ),
 };
 
+const removedBottomNumbers = new Set([25, 26, 30, 31, 32]);
+const bottomReferenceShapes = Array.from({ length: 32 }, (_, index) => index + 1)
+  .filter((bottomNumber) => !removedBottomNumbers.has(bottomNumber))
+  .map((bottomNumber) => `bottom-${String(bottomNumber).padStart(2, '0')}`);
+const dressReferenceShapes = Array.from({ length: 40 }, (_, index) => `dress-${String(index + 1).padStart(2, '0')}`);
+const glassesReferenceShapes = Array.from({ length: 10 }, (_, index) => `glasses-${String(index + 1).padStart(2, '0')}`);
+const shoeReferenceShapes = [1, 2, 3, 4, 5, 6, 13, 14, 15].map((shoeNumber) => `shoe-${String(shoeNumber).padStart(2, '0')}`);
+const shoeReferenceNames = [
+  'Black Lace Platform Sneakers',
+  'White Cloud Chunky Sneakers',
+  'Pink Ribbon Sport Sneakers',
+  'Midnight Chunky Sneakers',
+  'Latte Street Sneakers',
+  'Blush Peach Platform Sneakers',
+  'Classic Black Skate Sneakers',
+  'Rose Campus Sneakers',
+  'Cream Campus Sneakers',
+] as const;
+const bottomReferenceNames: Record<string, string> = {
+  'bottom-01': 'Rose Pleated Mini Skirt',
+  'bottom-02': 'Blue Denim Micro Skirt',
+  'bottom-03': 'Pink Bow Ruffle Skirt',
+  'bottom-04': 'Black Pleated School Skirt',
+  'bottom-05': 'Cream Lace Layer Skirt',
+  'bottom-06': 'Soft Pink Tennis Skirt',
+  'bottom-07': 'Washed Denim Shorts',
+  'bottom-08': 'Black Street Shorts',
+  'bottom-09': 'Blush Denim Shorts',
+  'bottom-10': 'Ivory Doll Shorts',
+  'bottom-11': 'Rose Wide Leg Trousers',
+  'bottom-12': 'Powder Blue Wide Jeans',
+  'bottom-13': 'Cream Straight Pants',
+  'bottom-14': 'Gray Cargo Pants',
+  'bottom-15': 'Black Utility Pants',
+  'bottom-16': 'Plaid Academy Skirt',
+  'bottom-17': 'Gray Pleated Midi Skirt',
+  'bottom-18': 'Pink Pleated Mini Skirt',
+  'bottom-19': 'Champagne Pleated Skirt',
+  'bottom-20': 'Black Classic Mini Skirt',
+  'bottom-21': 'Beige Tailored Trousers',
+  'bottom-22': 'Sky Blue Straight Jeans',
+  'bottom-23': 'Black Straight Jeans',
+  'bottom-24': 'Rose Flare Pants',
+  'bottom-27': 'Gray Wide Leg Pants',
+  'bottom-28': 'Cream Palazzo Pants',
+  'bottom-29': 'Blue Denim Flare Pants',
+};
+const dressReferenceNames = [
+  'Blush Ribbon Ruffle Dress',
+  'Vintage Floral Puff Dress',
+  'Ivory Bow Tiered Dress',
+  'Black Floral Puff Mini',
+  'Rose Garden Slip Dress',
+  'Cream Lace Picnic Dress',
+  'Black Sweetheart Mini Dress',
+  'Pink Plaid Doll Dress',
+  'Cream Puff Sleeve Tea Dress',
+  'Brown Polka Dot Halter Dress',
+  'Ivory Layered Lace Dress',
+  'Blue Floral Cami Dress',
+  'Buttercream Puff Sleeve Dress',
+  'Pink Petal Ruffle Dress',
+  'Blush Corset Mini Dress',
+  'Black Lace Bow Dress',
+  'White Floral Puff Dress',
+  'Cream Daisy Slip Dress',
+  'White Tiered Sundress',
+  'Black Button Puff Dress',
+  'Rose Puff Sleeve Dress',
+  'Black Cutout Bow Dress',
+  'Cream Ribbon Floral Dress',
+  'Brown Plaid Academy Dress',
+  'White Tiered Garden Dress',
+  'Pink Layered Ruffle Dress',
+  'Ivory Bow Collar Dress',
+  'Navy Polka Dot Puff Dress',
+  'White Dot Slip Dress',
+  'Pink Blossom Cami Dress',
+  'Black Cherry Slip Dress',
+  'Cream Floral Cottage Dress',
+  'Lavender Puff Sleeve Dress',
+  'Ivory Polka Dot Dress',
+  'Blush Ruched Mini Dress',
+  'Black Ribbon Ruffle Dress',
+  'Cream Rose Puff Dress',
+  'Blue Lace Cami Dress',
+  'Ivory Bow Tea Dress',
+  'Dusty Rose Mini Dress',
+] as const;
+const glassesReferenceNames = [
+  'Black Round Sunglasses',
+  'Amber Gold Sunglasses',
+  'Olive Round Sunglasses',
+  'Gold Rim Dark Sunglasses',
+  'Rose Pink Sunglasses',
+  'Black Round Frames',
+  'Gold Round Frames',
+  'Pink Round Frames',
+  'Tortoise Round Frames',
+  'Silver Round Frames',
+] as const;
+
 const shapes: Record<Category, readonly string[]> = {
-  hair: ['short', 'long', 'buns', 'ponytail', 'braids', 'claw-clip'],
-  bangs: ['straight', 'side-swept', 'curtain', 'rounded', 'wispy', 'layered', 'korean', 'heavy-straight'],
-  makeup: ['glow', 'liner', 'glam', 'goth', 'glow'],
-  tops: ['shirt', 'jacket', 'turtleneck', 'mock-neck', 'sweater', 'hoodie', 'cardigan', 'baby-tee', 'blazer', 'corset', 'wrap'],
-  bottoms: ['skirt', 'pants', 'shorts', 'cargo', 'wide-leg', 'low-rise', 'pleated', 'plaid'],
-  dresses: ['gown', 'mini', 'cape', 'slip', 'tutu', 'pinafore', 'lace'],
-  shoes: ['boots', 'sneakers', 'heels', 'sneakers-star', 'sneakers-heart', 'platform', 'loafers', 'ballet-flats', 'chunky'],
-  accessories: ['crown', 'tiara', 'headband', 'flower', 'hat', 'glasses', 'wings', 'cape', 'necklace', 'bow', 'pearls', 'bag', 'choker', 'headset'],
+  hair: ['long'],
+  tops: [
+    'top-06',
+    'top-11',
+    'top-12',
+    'top-13',
+    'top-14',
+    'top-21',
+    'top-22',
+    'top-25',
+    'top-26',
+    'top-27',
+    'top-29',
+    'top-31',
+    'top-32',
+    'top-38',
+    'top-39',
+    'top-42',
+    'top-43',
+    'top-44',
+    'top-45',
+    'top-46',
+    'top-47',
+    'top-48',
+  ],
+  bottoms: bottomReferenceShapes,
+  dresses: dressReferenceShapes,
+  shoes: shoeReferenceShapes,
+  bags: ['pink-bow-bag', 'purple-tote-bag', 'yellow-heart-bag', 'black-gothic-bag', 'burgundy-shoulder-bag'],
+  glasses: glassesReferenceShapes,
 };
 
 const itemDetails: Record<Category, readonly string[]> = {
   hair: ['Signature', 'Layered', 'Volume', 'Gloss', 'Premium'],
-  bangs: ['Soft', 'Statement', 'Airy', 'Doll', 'Premium'],
-  makeup: ['Clean', 'Gloss', 'Glow', 'Stage', 'Premium'],
-  tops: ['Tailored', 'Layered', 'Ribbon', 'Graphic', 'Premium'],
+  tops: ['Fitted', 'Styled', 'Layered', 'Statement', 'Premium'],
   bottoms: ['Fitted', 'Pleated', 'Utility', 'Patterned', 'Premium'],
   dresses: ['Waist-Fit', 'Corset', 'Layered', 'Runway', 'Premium'],
   shoes: ['Daily', 'Detailed', 'Platform', 'Statement', 'Premium'],
-  accessories: ['Charm', 'Polished', 'Layered', 'Icon', 'Premium'],
+  bags: ['Quilted', 'Tote', 'Charm'],
+  glasses: ['Soft', 'Runway', 'Doll', 'Premium', 'Icon'],
+};
+
+const fallbackNames: Record<Category, readonly string[]> = {
+  hair: ['Signature Hair'],
+  tops: ['Fashion Top'],
+  bottoms: ['Styled Bottom'],
+  dresses: ['Fashion Dress'],
+  shoes: ['Doll Shoes'],
+  bags: ['Fashion Bag'],
+  glasses: ['Fashion Glasses', 'Runway Glasses', 'Soft Frame Glasses'],
 };
 
 export function buildWardrobe(): ClothingItem[] {
-  return Object.entries(styles).flatMap(([style, def], styleIndex) =>
-    categories.flatMap((category) =>
-      itemDetails[category].map((detail, variantIndex) => {
-        const names = def.names[category];
+  const generatedItems = Object.entries(styles).flatMap(([style, def], styleIndex) =>
+    categories.flatMap((category) => {
+      if (category === 'hair' && styleIndex > 0) return [];
+      if (category === 'bags') return [];
+      if (category === 'bottoms') return [];
+      if (category === 'dresses') return [];
+      if (category === 'glasses') return [];
+      if (category === 'shoes') return [];
+      const details = category === 'hair' ? ['Signature'] : itemDetails[category];
+
+      return details.map((detail, variantIndex) => {
+        const names = def.names[category] ?? fallbackNames[category];
         const shapeList = shapes[category];
         const baseName = names[variantIndex % names.length];
         const shape = shapeList[(styleIndex + variantIndex) % shapeList.length];
-        const premium = variantIndex === 4 || (category === 'dresses' && variantIndex === 3) || (category === 'shoes' && variantIndex === 3);
+        const premium = variantIndex === 4;
         const color = def.colors[variantIndex % def.colors.length];
         const price = premium ? 120 + styleIndex * 12 + variantIndex * 20 : 0;
 
@@ -332,7 +473,7 @@ export function buildWardrobe(): ClothingItem[] {
           name: `${detail} ${baseName}`,
           category,
           color,
-          assetPath: `/assets/style-rush/${category}/${shape}.png`,
+          assetPath: category === 'hair' ? '/assets/style-rush/hair/hv-1.png' : `/assets/style-rush/${category}/${shape}.png`,
           placement: getAssetPlacement(category, shape),
           layerIndex: getDefaultLayerIndex(category, shape),
           tags: def.tags,
@@ -340,15 +481,53 @@ export function buildWardrobe(): ClothingItem[] {
           levelRequired: premium ? 1 + Math.floor(styleIndex / 5) : 1,
           shape,
         };
-      }),
-    ),
+      });
+    }),
   );
+
+  return [...customReferenceItems, ...generatedItems];
 }
 
 export function getStarterItemIds(items: readonly ClothingItem[]): string[] {
   return items.filter((item) => item.price === 0).map((item) => item.id);
 }
 
-function makeStyle(tags: readonly string[], colors: readonly RGB[], names: Record<Category, readonly string[]>): StyleDef {
+function makeStyle(tags: readonly string[], colors: readonly RGB[], names: Record<string, readonly string[]>): StyleDef {
   return { colors, names, tags };
+}
+
+const customReferenceItems: readonly ClothingItem[] = [
+  ...bottomReferenceShapes.map((shape, index) =>
+    makeReferenceItem(`bottoms_reference_${shape}`, bottomReferenceNames[shape] ?? `Styled Bottom ${index + 1}`, 'bottoms', shape, [210, 178, 172]),
+  ),
+  ...dressReferenceShapes.map((shape, index) =>
+    makeReferenceItem(`dresses_reference_${shape}`, dressReferenceNames[index], 'dresses', shape, [232, 190, 202]),
+  ),
+  ...shoeReferenceShapes.map((shape, index) =>
+    makeReferenceItem(`shoes_reference_${shape}`, shoeReferenceNames[index], 'shoes', shape, [224, 178, 170]),
+  ),
+  ...glassesReferenceShapes.map((shape, index) =>
+    makeReferenceItem(`glasses_reference_${shape}`, glassesReferenceNames[index], 'glasses', shape, [190, 174, 150]),
+  ),
+  makeReferenceItem('bags_reference_pink_bow_bag', 'Pink Bow Handbag', 'bags', 'pink-bow-bag', [245, 150, 180]),
+  makeReferenceItem('bags_reference_purple_tote_bag', 'Purple Tote Bag', 'bags', 'purple-tote-bag', [194, 145, 214]),
+  makeReferenceItem('bags_reference_yellow_heart_bag', 'Yellow Heart Bag', 'bags', 'yellow-heart-bag', [255, 205, 24]),
+  makeReferenceItem('bags_reference_black_gothic_bag', 'Black Gothic Bag', 'bags', 'black-gothic-bag', [20, 20, 22]),
+  makeReferenceItem('bags_reference_burgundy_shoulder_bag', 'Burgundy Shoulder Bag', 'bags', 'burgundy-shoulder-bag', [92, 24, 36]),
+];
+
+function makeReferenceItem(id: string, name: string, category: Category, shape: string, color: RGB): ClothingItem {
+  return {
+    id,
+    name,
+    category,
+    color,
+    assetPath: `/assets/style-rush/${category}/${shape}.png`,
+    placement: getAssetPlacement(category, shape),
+    layerIndex: getDefaultLayerIndex(category, shape),
+    tags: ['coquette', 'pink', 'reference-asset'],
+    price: 0,
+    levelRequired: 1,
+    shape,
+  };
 }

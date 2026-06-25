@@ -18,9 +18,10 @@ export function TintedAsset({ alt, className, color, src, style, tintMode = 'rec
     const canvas = canvasRef.current;
     if (!canvas) return;
 
+    let active = true;
     const image = new Image();
-    image.src = src;
     image.onload = () => {
+      if (!active) return;
       canvas.width = image.naturalWidth;
       canvas.height = image.naturalHeight;
       const context = canvas.getContext('2d', { willReadFrequently: true });
@@ -50,7 +51,19 @@ export function TintedAsset({ alt, className, color, src, style, tintMode = 'rec
       }
       context.putImageData(frame, 0, 0);
     };
-  }, [color, src]);
+    image.onerror = () => {
+      if (!active) return;
+      const context = canvas.getContext('2d');
+      context?.clearRect(0, 0, canvas.width, canvas.height);
+    };
+    image.src = src;
+
+    return () => {
+      active = false;
+      image.onload = null;
+      image.onerror = null;
+    };
+  }, [color, src, tintMode]);
 
   return <canvas aria-label={alt} className={className} ref={canvasRef} role="img" style={style} />;
 }

@@ -4,15 +4,15 @@ export const layerOrder = {
   background: 1,
   body: 2,
   underwear: 3,
-  shorts: 4,
-  pants: 4,
-  skirts: 4,
-  tops: 5,
-  dressesBack: 5,
-  jacketsBack: 5,
-  dressesFront: 5,
-  jacketsFront: 5,
-  shoes: 6,
+  shoes: 4,
+  shorts: 5,
+  pants: 5,
+  skirts: 5,
+  tops: 6,
+  dressesBack: 6,
+  jacketsBack: 6,
+  dressesFront: 6,
+  jacketsFront: 6,
   backAccessories: 7,
   backWings: 7,
   necklaces: 7,
@@ -21,12 +21,10 @@ export const layerOrder = {
   handAccessories: 7,
   backHair: 8,
   face: 9,
-  makeup: 9,
   blush: 9,
   eyebrows: 9,
   eyes: 9,
   mouth: 9,
-  bangs: 10,
   frontHair: 10,
   hairAccessoriesBack: 10,
   glasses: 11,
@@ -41,31 +39,32 @@ export const layerOrder = {
 } as const;
 
 export function getDefaultLayerIndex(category: Category, shape: string): number {
-  if (category === 'hair') return isFrontHair(shape) ? layerOrder.frontHair : layerOrder.backHair;
-  if (category === 'bangs') return layerOrder.bangs;
-  if (category === 'makeup') return layerOrder.makeup;
-  if (category === 'tops') return isJacket(shape) ? layerOrder.jacketsFront : layerOrder.tops;
+  if (category === 'hair') return isFrontHair() ? layerOrder.frontHair : layerOrder.backHair;
+  if (category === 'tops') return layerOrder.tops;
   if (category === 'bottoms') return getBottomLayerIndex(shape);
   if (category === 'dresses') return layerOrder.dressesFront;
   if (category === 'shoes') return layerOrder.shoes;
+  if (category === 'bags') return layerOrder.bagsFront;
+  if (category === 'glasses') return layerOrder.glasses;
   return getAccessoryLayerIndex(shape);
 }
 
 export function getRenderLayerIndex(item: ClothingItem): number {
-  if (item.category === 'hair') return isFrontHair(item.shape) ? layerOrder.frontHair : layerOrder.backHair;
-  if (item.category === 'accessories') return getAccessoryLayerIndex(item.shape);
-  if (item.category === 'tops' && isJacket(item.shape)) return layerOrder.jacketsFront;
+  if (item.category === 'hair') return isFrontHair() ? layerOrder.frontHair : layerOrder.backHair;
+  if (item.category === 'bags') return layerOrder.bagsFront;
+  if (item.category === 'glasses') return layerOrder.glasses;
+  if (item.category === 'tops') return layerOrder.tops;
   return item.layerIndex;
 }
 
 export function getRenderLayerName(item: ClothingItem): string {
-  if (item.category === 'hair') return isFrontHair(item.shape) ? 'frontHair' : 'backHair';
-  if (item.category === 'bangs') return 'bangs';
-  if (item.category === 'makeup') return 'makeup';
+  if (item.category === 'hair') return isFrontHair() ? 'frontHair' : 'backHair';
   if (item.category === 'shoes') return 'shoes';
   if (item.category === 'dresses') return 'dress_front';
-  if (item.category === 'tops') return isJacket(item.shape) ? 'jacket_front' : 'top';
+  if (item.category === 'tops') return 'top';
   if (item.category === 'bottoms') return getBottomLayerName(item.shape);
+  if (item.category === 'bags') return 'bag_front';
+  if (item.category === 'glasses') return 'glasses';
   return getAccessoryLayerName(item.shape);
 }
 
@@ -84,8 +83,7 @@ function getBottomLayerName(shape: string): string {
 function getAccessoryLayerIndex(shape: string): number {
   if (shape === 'wings') return layerOrder.backWings;
   if (shape === 'cape') return layerOrder.backAccessories;
-  if (shape === 'bag') return layerOrder.bagsFront;
-  if (shape === 'glasses') return layerOrder.glasses;
+  if (shape.includes('bag')) return layerOrder.bagsFront;
   if (shape === 'choker' || shape === 'necklace' || shape === 'pearls') return layerOrder.necklaces;
   if (shape === 'headband') return layerOrder.headbands;
   if (shape === 'bow') return layerOrder.bows;
@@ -96,8 +94,7 @@ function getAccessoryLayerIndex(shape: string): number {
 function getAccessoryLayerName(shape: string): string {
   if (shape === 'wings') return 'back_wings';
   if (shape === 'cape') return 'back_accessory';
-  if (shape === 'bag') return 'bag_front';
-  if (shape === 'glasses') return 'glasses';
+  if (shape.includes('bag')) return 'bag_front';
   if (shape === 'choker' || shape === 'necklace' || shape === 'pearls') return 'necklace';
   if (shape === 'headband') return 'headband';
   if (shape === 'bow') return 'bow';
@@ -105,10 +102,6 @@ function getAccessoryLayerName(shape: string): string {
   return 'frontAccessory';
 }
 
-function isFrontHair(shape: string): boolean {
-  return shape === 'short' || shape === 'claw-clip';
-}
-
-function isJacket(shape: string): boolean {
-  return shape === 'jacket' || shape === 'blazer' || shape === 'cardigan' || shape === 'hoodie';
+function isFrontHair(): boolean {
+  return false;
 }

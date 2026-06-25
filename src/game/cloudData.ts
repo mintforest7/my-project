@@ -28,6 +28,7 @@ type SavedOutfitRow = {
   dress: string | null;
   shoes: string | null;
   accessories: string | null;
+  glasses: string | null;
   created_at: string;
 };
 
@@ -92,7 +93,7 @@ export async function saveOwnedItem(itemId: string): Promise<void> {
 export async function loadSavedOutfits(): Promise<SavedOutfit[]> {
   const { data, error } = await supabase
     .from('saved_outfits')
-    .select('id,outfit_name,hair,bangs,makeup,top,bottom,dress,shoes,accessories,created_at')
+    .select('id,outfit_name,hair,bangs,makeup,top,bottom,dress,shoes,accessories,glasses,created_at')
     .order('created_at', { ascending: false });
 
   if (error) throw error;
@@ -105,19 +106,20 @@ export async function saveOutfit(draft: SavedOutfitDraft): Promise<SavedOutfit> 
     user_id: userId,
     outfit_name: draft.name,
     hair: itemId(draft.outfit.hair),
-    bangs: itemId(draft.outfit.bangs),
-    makeup: itemId(draft.outfit.makeup),
+    bangs: null,
+    makeup: null,
     top: itemId(draft.outfit.tops),
     bottom: itemId(draft.outfit.bottoms),
     dress: itemId(draft.outfit.dresses),
     shoes: itemId(draft.outfit.shoes),
-    accessories: itemId(draft.outfit.accessories),
+    accessories: itemId(draft.outfit.bags),
+    glasses: itemId(draft.outfit.glasses),
   };
 
   const { data, error } = await supabase
     .from('saved_outfits')
     .insert(body)
-    .select('id,outfit_name,hair,bangs,makeup,top,bottom,dress,shoes,accessories,created_at')
+    .select('id,outfit_name,hair,bangs,makeup,top,bottom,dress,shoes,accessories,glasses,created_at')
     .single();
 
   if (error) throw error;
@@ -192,13 +194,12 @@ function rowToSavedOutfit(row: SavedOutfitRow): SavedOutfit {
     name: row.outfit_name,
     itemIds: {
       hair: row.hair ?? undefined,
-      bangs: row.bangs ?? undefined,
-      makeup: row.makeup ?? undefined,
       tops: row.top ?? undefined,
       bottoms: row.bottom ?? undefined,
       dresses: row.dress ?? undefined,
       shoes: row.shoes ?? undefined,
-      accessories: row.accessories ?? undefined,
+      bags: row.accessories ?? undefined,
+      glasses: row.glasses ?? undefined,
     },
     createdAt: row.created_at,
   };

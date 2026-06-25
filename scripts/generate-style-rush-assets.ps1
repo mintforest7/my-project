@@ -504,40 +504,6 @@ function Draw-Hair($name, $mode) {
     $g.DrawLine((Pen "#ffffff" 4), 158, 78, 142, 292)
     $g.DrawLine((Pen "#eeeeee" 3), 262, 78, 278, 292)
     $g.DrawLine((Pen "#666666" 2), 210, 42, 210, 92)
-  } elseif ($mode -eq "buns") {
-    $g.FillEllipse($main, 118, 64, 54, 54)
-    $g.FillEllipse($main, 248, 64, 54, 54)
-    $g.FillPie($main, 143, 38, 134, 132, 195, 150)
-    $g.DrawArc($line, 143, 38, 134, 132, 195, 150)
-  } elseif ($mode -eq "ponytail") {
-    $g.FillPie($main, 142, 38, 136, 132, 190, 160)
-    Fill-Rounded $g $shade 236 106 34 26 12
-    $tail = Path-Body @((New-Object Drawing.PointF 252,116),(New-Object Drawing.PointF 300,154),(New-Object Drawing.PointF 284,286),(New-Object Drawing.PointF 244,346),(New-Object Drawing.PointF 232,226))
-    $g.FillPath($main, $tail)
-    $g.DrawPath($line, $tail)
-    $g.DrawLine((Pen "#eeeeee" 3), 266, 146, 252, 314)
-    $g.DrawArc($line, 142, 38, 136, 132, 190, 160)
-  } elseif ($mode -eq "braids") {
-    $g.FillPie($main, 142, 38, 136, 132, 190, 160)
-    Fill-Rounded $g $main 146 128 24 160 12
-    Fill-Rounded $g $main 250 128 24 160 12
-    for ($i = 0; $i -lt 6; $i++) {
-      $y = 138 + $i * 24
-      $g.DrawLine((Pen "#666666" 3), 148, $y, 170, $y + 18)
-      $g.DrawLine((Pen "#666666" 3), 170, $y, 148, $y + 18)
-      $g.DrawLine((Pen "#666666" 3), 252, $y, 274, $y + 18)
-      $g.DrawLine((Pen "#666666" 3), 274, $y, 252, $y + 18)
-    }
-    $g.FillEllipse($shade, 150, 280, 18, 14)
-    $g.FillEllipse($shade, 252, 280, 18, 14)
-  } elseif ($mode -eq "claw-clip") {
-    $g.FillPie($main, 142, 38, 136, 132, 190, 160)
-    $g.FillEllipse($main, 178, 84, 64, 58)
-    $g.DrawEllipse($line, 178, 84, 64, 58)
-    Fill-Rounded $g $hi 194 86 32 38 8
-    $g.DrawLine($line, 202, 90, 202, 122)
-    $g.DrawLine($line, 218, 90, 218, 122)
-    $g.DrawArc($line, 142, 38, 136, 132, 190, 160)
   } else {
     $g.FillPie($main, 142, 38, 136, 132, 190, 160)
     $g.FillRectangle($main, 142, 82, 30, 112)
@@ -803,12 +769,7 @@ Draw-BodyPart "torso"
 Draw-BodyPart "head"
 Draw-Face
 Draw-BaseBodysuit
-Draw-Hair "short" "short"
 Draw-Hair "long" "long"
-Draw-Hair "buns" "buns"
-Draw-Hair "ponytail" "ponytail"
-Draw-Hair "braids" "braids"
-Draw-Hair "claw-clip" "claw-clip"
 Draw-Bangs "straight" "straight"
 Draw-Bangs "side-swept" "side-swept"
 Draw-Bangs "curtain" "curtain"

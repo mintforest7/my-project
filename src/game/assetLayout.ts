@@ -31,39 +31,45 @@ const bodyAnchors: Record<BodyAnchorName, BodyAnchor> = {
 
 const fitPresets: Record<Category, Record<string, FitPreset>> = {
   hair: {
-    long: slot('head', 43, 40, 0, 4.8, hairMask()),
-    short: slot('head', 44, 39, 0, 4.8, hairMask()),
-    buns: slot('head', 44, 39, 0, 4.8, hairMask()),
-    ponytail: slot('head', 44, 39, 0, 4.8, hairMask()),
-    braids: slot('head', 42, 40, 0, 4.8, hairMask()),
-    'claw-clip': slot('head', 39, 34, 0, 5.8, hairMask()),
+    long: slot('fullBody', 92.4, 92.4, 1.19, -3.38),
   },
-  bangs: {
-    straight: slot('face', 22, 9, 0, -7, fringeMask()),
-    'side-swept': slot('face', 23, 10, 0, -7, fringeMask()),
-    curtain: slot('face', 23, 10, 0, -7, fringeMask()),
-    rounded: slot('face', 23, 9, 0, -7, fringeMask()),
-    'heavy-straight': slot('face', 23, 10, 0, -7, fringeMask()),
-    wispy: slot('face', 22, 10, 0, -7, fringeMask()),
-    layered: slot('face', 23, 10, 0, -7, fringeMask()),
-    korean: slot('face', 22, 10, 0, -7, fringeMask()),
-  },
-  makeup: {},
   tops: {
-    shirt: slot('chest', 27, 20, 0, -1, torsoMask()),
-    jacket: slot('chest', 31, 22, 0, -1, jacketMask()),
-    turtleneck: slot('chest', 30, 22, 0, -1, torsoMask()),
-    'mock-neck': slot('chest', 29, 21, 0, -1, torsoMask()),
-    sweater: slot('chest', 29, 21, 0, -1, torsoMask()),
-    hoodie: slot('chest', 30, 20, 0, 0, jacketMask()),
-    cardigan: slot('chest', 30, 21, 0, -1, jacketMask()),
-    'baby-tee': slot('chest', 28, 20, 0, 0, torsoMask()),
-    blazer: slot('chest', 31, 22, 0, -1, jacketMask()),
-    corset: slot('chest', 27, 20, 0, 0, torsoMask()),
-    wrap: slot('chest', 27, 20, 0, 0, torsoMask()),
-    armor: slot('chest', 31, 22, 0, -1, jacketMask()),
+    'top-06': topSlot(0.48, 0),
+    'top-11': topSlot(0, -1.13),
+    'top-12': topSlot(0.48, 0),
+    'top-13': topSlot(0, -1.13),
+    'top-21': topSlot(0, -1.13),
+    'top-22': topSlot(0.48, 0),
+    'top-25': topSlot(0, -1.13),
+    'top-26': topSlot(0, -1.13),
+    'top-29': topSlot(0.48, 0),
+    'top-31': topSlot(0.48, 0),
   },
   bottoms: {
+    'bottom-03': shortBottomSlot(0.728, 0.01),
+    'bottom-04': shortBottomSlot(0.728, 0.01),
+    'bottom-05': shortBottomSlot(0.728, 0.01),
+    'bottom-06': shortBottomSlot(0.728, 0.01),
+    'bottom-07': shortBottomSlot(0.728, 0.01),
+    'bottom-08': shortBottomSlot(0.728, 0.01),
+    'bottom-09': shortBottomSlot(0.728, 0.01, 0.95),
+    'bottom-10': shortBottomSlot(0.728, 0.01),
+    'bottom-11': shortBottomSlot(0.728, 0.01, 0.95),
+    'bottom-12': shortBottomSlot(0.728, 0.01, 0.95),
+    'bottom-13': shortBottomSlot(0.728, 0.01),
+    'bottom-14': pantsBottomSlot(1, -2.42),
+    'bottom-16': pantsBottomSlot(1, -2.42),
+    'bottom-17': pantsBottomSlot(1, -4.84),
+    'bottom-18': pantsBottomSlot(1, -1.61),
+    'bottom-19': pantsBottomSlot(1, -1.61),
+    'bottom-20': pantsBottomSlot(1, -1.61),
+    'bottom-21': pantsBottomSlot(1.2, 0),
+    'bottom-22': pantsBottomSlot(1.15, 0),
+    'bottom-23': pantsBottomSlot(1.15, 0),
+    'bottom-24': pantsBottomSlot(1.15, 0),
+    'bottom-27': pantsBottomSlot(1.15, 0),
+    'bottom-28': pantsBottomSlot(1.2, 0),
+    'pink-ruffle-skirt': slot('hips', 34, 18, 0, -2, skirtMask()),
     skirt: slot('hips', 37, 19, 0, -2, skirtMask()),
     pants: slot('legs', 33, 40, 0, -4, pantsMask()),
     shorts: slot('hips', 35, 17, 0, -2, shortsMask()),
@@ -73,46 +79,31 @@ const fitPresets: Record<Category, Record<string, FitPreset>> = {
     pleated: slot('hips', 37, 19, 0, -2, skirtMask()),
     plaid: slot('hips', 37, 20, 0, -2, skirtMask()),
   },
-  dresses: {
-    gown: slot('shoulders', 39, 62, 0, 1, dressMask()),
-    mini: slot('shoulders', 37, 38, 0, 1, dressMask()),
-    cape: slot('shoulders', 39, 62, 0, 1, dressMask()),
-    slip: slot('shoulders', 36, 38, 0, 1, dressMask()),
-    tutu: slot('shoulders', 38, 39, 0, 1, dressMask()),
-    pinafore: slot('shoulders', 37, 37, 0, 1, dressMask()),
-    lace: slot('shoulders', 37, 38, 0, 1, dressMask()),
+  dresses: {},
+  shoes: {},
+  bags: {
+    'pink-bow-bag': slot('hands', 25, 21, 24, 0),
+    'purple-tote-bag': slot('hands', 25, 21, 24, 0),
+    'yellow-heart-bag': slot('hands', 25, 21, 24, 0),
+    'black-gothic-bag': slot('hands', 27, 21, 24, 2),
+    'burgundy-shoulder-bag': slot('hands', 23, 29, 24, -1),
   },
-  shoes: {
-    boots: slot('feet', 31, 10, 0, -3, shoesMask()),
-    sneakers: slot('feet', 29, 8, 0, -2, shoesMask()),
-    'sneakers-star': slot('feet', 29, 8, 0, -2, shoesMask()),
-    'sneakers-heart': slot('feet', 29, 8, 0, -2, shoesMask()),
-    heels: slot('feet', 29, 8, 0, -2, shoesMask()),
-    platform: slot('feet', 30, 9, 0, -2, shoesMask()),
-    loafers: slot('feet', 29, 8, 0, -2, shoesMask()),
-    'ballet-flats': slot('feet', 28, 8, 0, -2, shoesMask()),
-    chunky: slot('feet', 30, 9, 0, -2, shoesMask()),
-  },
-  accessories: {
-    bag: slot('hands', 19, 16, 24, -1),
-    bow: slot('head', 17, 8, 0, -9),
-    choker: slot('shoulders', 14, 9, 0, -3),
-    cape: slot('shoulders', 66, 62, 0, 6),
-    crown: slot('head', 19, 9, 0, -12),
-    flower: slot('head', 12, 7, 13, -6),
-    glasses: slot('face', 20, 7, 0, -1),
-    hat: slot('head', 23, 9, 0, -12),
-    headband: slot('head', 25, 11, 0, -9),
-    headset: slot('head', 27, 15, 0, -7),
-    necklace: slot('shoulders', 15, 14, 0, -2),
-    pearls: slot('shoulders', 17, 8, 0, -1),
-    tiara: slot('head', 21, 8, 0, -11),
-    wings: slot('shoulders', 70, 34, 0, 12),
+  glasses: {
+    'glasses-01': glassesSlot(),
+    'glasses-02': glassesSlot(),
+    'glasses-03': glassesSlot(),
+    'glasses-04': glassesSlot(),
+    'glasses-05': glassesSlot(),
+    'glasses-06': glassesSlot(),
+    'glasses-07': glassesSlot(),
+    'glasses-08': glassesSlot(),
+    'glasses-09': glassesSlot(),
+    'glasses-10': glassesSlot(),
   },
 };
 
 export function getAssetPlacement(category: Category, shape: string): AssetPlacement {
-  const preset = fitPresets[category][shape] ?? fallbackPreset(category);
+  const preset = fitPresets[category][shape] ?? fallbackPreset(category, shape);
   const anchor = bodyAnchors[preset.anchor];
 
   return {
@@ -125,14 +116,14 @@ export function getAssetPlacement(category: Category, shape: string): AssetPlace
   };
 }
 
-function fallbackPreset(category: Category): FitPreset {
-  if (category === 'hair') return slot('head', 38, 34, 0, -10, hairMask());
-  if (category === 'bangs') return slot('face', 23, 10, 0, -7, fringeMask());
-  if (category === 'tops') return slot('chest', 29, 21, 0, -1, torsoMask());
-  if (category === 'bottoms') return slot('hips', 35, 20, 0, -2, skirtMask());
-  if (category === 'dresses') return slot('shoulders', 38, 42, 0, 1, dressMask());
-  if (category === 'shoes') return slot('feet', 29, 8, 0, -2, shoesMask());
-  if (category === 'makeup') return slot('face', 18, 10, 0, 0);
+function fallbackPreset(category: Category, shape: string): FitPreset {
+  if (category === 'hair') return slot('fullBody', 100, 100);
+  if (category === 'tops') return topSlot();
+  if (category === 'bottoms') return bottomSlot(shape);
+  if (category === 'dresses') return dressSlot();
+  if (category === 'shoes') return slot('feet', 46.05, 11.58, 0.86, 2.14);
+  if (category === 'glasses') return glassesSlot();
+  if (category === 'bags') return slot('hands', 25, 21, 24, 0);
   return slot('hands', 18, 14, 0, 0);
 }
 
@@ -140,20 +131,37 @@ function slot(anchor: BodyAnchorName, width: number, height: number, offsetX = 0
   return { anchor, clipPath, height, offsetX, offsetY, width };
 }
 
-function hairMask(): string {
-  return 'ellipse(48% 50% at 50% 48%)';
+function topSlot(offsetX = 0, offsetY = 0): FitPreset {
+  return slot('chest', 31.81, 30.45, 0.12 + offsetX, -2.29 + offsetY, upperBodyMask());
 }
 
-function fringeMask(): string {
-  return 'ellipse(50% 46% at 50% 54%)';
+function dressSlot(): FitPreset {
+  return slot('fullBody', 26.1, 36.3, 0.12, 4.35);
 }
 
-function torsoMask(): string {
-  return 'polygon(18% 6%, 82% 6%, 92% 34%, 76% 100%, 24% 100%, 8% 34%)';
+function glassesSlot(): FitPreset {
+  return slot('fullBody', 20.48, 5.65, 0.48, -33.23);
 }
 
-function jacketMask(): string {
-  return 'polygon(8% 4%, 92% 4%, 100% 100%, 0 100%)';
+function bottomSlot(shape: string): FitPreset {
+  const bottomNumber = Number(shape.replace('bottom-', ''));
+  const isShortOrSkirt = bottomNumber >= 1 && bottomNumber <= 13;
+
+  return isShortOrSkirt
+    ? shortBottomSlot(0.8, 0.82)
+    : pantsBottomSlot();
+}
+
+function shortBottomSlot(scale = 1, offsetY = 4.85, offsetX = 0): FitPreset {
+  return slot('fullBody', 41.9 * scale, 20.97 * scale, offsetX, offsetY);
+}
+
+function pantsBottomSlot(scale = 1, offsetY = 0): FitPreset {
+  return slot('fullBody', 34.07 * scale, 53 * scale, 0.12, 16.14 + offsetY);
+}
+
+function upperBodyMask(): string {
+  return 'polygon(22% 0, 78% 0, 100% 22%, 92% 100%, 8% 100%, 0 22%)';
 }
 
 function shortsMask(): string {
@@ -166,12 +174,4 @@ function pantsMask(): string {
 
 function skirtMask(): string {
   return 'polygon(20% 0, 80% 0, 100% 100%, 0 100%)';
-}
-
-function dressMask(): string {
-  return 'polygon(28% 0, 72% 0, 92% 36%, 86% 100%, 14% 100%, 8% 36%)';
-}
-
-function shoesMask(): string {
-  return 'polygon(10% 18%, 90% 18%, 100% 82%, 84% 100%, 16% 100%, 0 82%)';
 }
