@@ -293,11 +293,11 @@ const styles: Record<string, StyleDef> = {
   ),
 };
 
-const removedBottomNumbers = new Set([25, 26, 30, 31, 32]);
+const removedBottomNumbers = new Set([21, 25, 26, 29, 30, 31, 32]);
 const bottomReferenceShapes = Array.from({ length: 32 }, (_, index) => index + 1)
   .filter((bottomNumber) => !removedBottomNumbers.has(bottomNumber))
   .map((bottomNumber) => `bottom-${String(bottomNumber).padStart(2, '0')}`);
-const dressReferenceShapes = Array.from({ length: 40 }, (_, index) => `dress-${String(index + 1).padStart(2, '0')}`);
+const dressReferenceShapes = Array.from({ length: 20 }, (_, index) => `dress-${String(index + 21).padStart(2, '0')}`);
 const glassesReferenceShapes = Array.from({ length: 10 }, (_, index) => `glasses-${String(index + 1).padStart(2, '0')}`);
 const shoeReferenceShapes = [1, 2, 3, 4, 5, 6, 13, 14, 15].map((shoeNumber) => `shoe-${String(shoeNumber).padStart(2, '0')}`);
 const shoeReferenceNames = [
@@ -332,13 +332,11 @@ const bottomReferenceNames: Record<string, string> = {
   'bottom-18': 'Pink Pleated Mini Skirt',
   'bottom-19': 'Champagne Pleated Skirt',
   'bottom-20': 'Black Classic Mini Skirt',
-  'bottom-21': 'Beige Tailored Trousers',
   'bottom-22': 'Sky Blue Straight Jeans',
   'bottom-23': 'Black Straight Jeans',
   'bottom-24': 'Rose Flare Pants',
   'bottom-27': 'Gray Wide Leg Pants',
   'bottom-28': 'Cream Palazzo Pants',
-  'bottom-29': 'Blue Denim Flare Pants',
 };
 const dressReferenceNames = [
   'Blush Ribbon Ruffle Dress',
@@ -522,6 +520,19 @@ const customReferenceItems: readonly ClothingItem[] = [
     shape: 'hair-02',
   },
   {
+    id: 'hair_reference_hair_03',
+    name: 'Soft Bangs Bob Hair',
+    category: 'hair',
+    color: [122, 70, 46],
+    assetPath: '/assets/style-rush/hair/hair-03.png',
+    placement: getAssetPlacement('hair', 'hair-03'),
+    layerIndex: getDefaultLayerIndex('hair', 'hair-03'),
+    tags: ['brown', 'bob', 'bangs', 'reference-asset'],
+    price: 0,
+    levelRequired: 1,
+    shape: 'hair-03',
+  },
+  {
     id: 'hair_reference_hair_04',
     name: 'Blonde Twin Curls Hair',
     category: 'hair',
@@ -550,9 +561,16 @@ const customReferenceItems: readonly ClothingItem[] = [
   ...bottomReferenceShapes.map((shape, index) =>
     makeReferenceItem(`bottoms_reference_${shape}`, bottomReferenceNames[shape] ?? fallbackReferenceName('bottoms', index), 'bottoms', shape, [210, 178, 172]),
   ),
-  ...dressReferenceShapes.map((shape, index) =>
-    makeReferenceItem(`dresses_reference_${shape}`, dressReferenceNames[index] ?? fallbackReferenceName('dresses', index), 'dresses', shape, [232, 190, 202]),
-  ),
+  ...dressReferenceShapes.map((shape, index) => {
+    const dressNumber = Number(shape.replace('dress-', ''));
+    return makeReferenceItem(
+      `dresses_reference_${shape}`,
+      dressReferenceNames[dressNumber - 1] ?? fallbackReferenceName('dresses', index),
+      'dresses',
+      shape,
+      [232, 190, 202],
+    );
+  }),
   ...shoeReferenceShapes.map((shape, index) =>
     makeReferenceItem(`shoes_reference_${shape}`, shoeReferenceNames[index] ?? fallbackReferenceName('shoes', index), 'shoes', shape, [224, 178, 170]),
   ),

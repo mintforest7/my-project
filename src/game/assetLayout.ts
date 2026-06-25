@@ -33,20 +33,27 @@ const fitPresets: Record<Category, Record<string, FitPreset>> = {
   hair: {
     long: slot('fullBody', 92.4, 92.4, 1.19, -3.38),
     'hair-02': slot('fullBody', 100, 100),
+    'hair-03': slot('fullBody', 100, 100),
     'hair-04': slot('fullBody', 100, 100),
     'hair-05': slot('fullBody', 100, 100),
   },
   tops: {
-    'top-06': topSlot(0.48, 0),
-    'top-11': topSlot(0, -1.13),
+    'top-06': topSlot(0.48, -0.32),
+    'top-11': topSlot(0, -0.81),
     'top-12': topSlot(0.48, 0),
-    'top-13': topSlot(0, -1.13),
-    'top-21': topSlot(0, -1.13),
+    'top-13': topSlot(0.48, -0.81),
+    'top-21': topSlot(0, -0.81),
     'top-22': topSlot(0.48, 0),
-    'top-25': topSlot(0, -1.13),
-    'top-26': topSlot(0, -1.13),
+    'top-25': topSlot(0.48, -0.81),
+    'top-26': topSlot(0, -1.61),
     'top-29': topSlot(0.48, 0),
-    'top-31': topSlot(0.48, 0),
+    'top-31': topSlot(0.96, 0.32),
+    'top-32': topSlot(0, -0.48),
+    'top-38': topSlot(0, 0.32),
+    'top-42': topSlot(0.48, 0.32),
+    'top-43': topSlot(0, -0.48),
+    'top-44': topSlot(0, 0.32),
+    'top-47': topSlot(0, -0.48),
   },
   bottoms: {
     'bottom-03': shortBottomSlot(0.728, 0.01),
@@ -69,7 +76,7 @@ const fitPresets: Record<Category, Record<string, FitPreset>> = {
     'bottom-21': pantsBottomSlot(1.2, 0),
     'bottom-22': pantsBottomSlot(1.15, 0),
     'bottom-23': pantsBottomSlot(1.15, 0),
-    'bottom-24': pantsBottomSlot(1.15, 0),
+    'bottom-24': pantsBottomSlot(1.15, 0, 0.83),
     'bottom-27': pantsBottomSlot(1.15, 0),
     'bottom-28': pantsBottomSlot(1.2, 0),
     'pink-ruffle-skirt': slot('hips', 34, 18, 0, -2, skirtMask()),
@@ -142,7 +149,7 @@ function topSlot(offsetX = 0, offsetY = 0): FitPreset {
 }
 
 function dressSlot(): FitPreset {
-  return slot('fullBody', 26.1, 36.3, 0.12, 4.35);
+  return slot('fullBody', 31.32, 43.56, 0.12, 4.35);
 }
 
 function glassesSlot(): FitPreset {
@@ -162,8 +169,8 @@ function shortBottomSlot(scale = 1, offsetY = 4.85, offsetX = 0): FitPreset {
   return slot('fullBody', 41.9 * scale, 20.97 * scale, offsetX, offsetY);
 }
 
-function pantsBottomSlot(scale = 1, offsetY = 0): FitPreset {
-  return slot('fullBody', 34.07 * scale, 53 * scale, 0.12, 16.14 + offsetY);
+function pantsBottomSlot(scale = 1, offsetY = 0, offsetX = 0.12): FitPreset {
+  return slot('fullBody', 34.07 * scale, 53 * scale, offsetX, 16.14 + offsetY);
 }
 
 function upperBodyMask(): string {
