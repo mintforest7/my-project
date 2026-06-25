@@ -77,6 +77,22 @@ function buildRenderLayers({
 function addItemLayer(layers: RenderLayer[], item: ClothingItem | undefined, colorOverride: RGB | undefined, debugLayers: boolean): void {
   if (!item) return;
 
+  if (item.category === 'hair' && item.backAssetPath && item.frontAssetPath) {
+    layers.push({
+      id: `${item.id}-back`,
+      label: 'backHair',
+      layerIndex: layerOrder.body - 1,
+      node: <ClothingLayer color={colorOverride ?? item.color} debugLayers={debugLayers} item={item} layerIndex={layerOrder.body - 1} src={item.backAssetPath} />,
+    });
+    layers.push({
+      id: `${item.id}-front`,
+      label: 'frontHair',
+      layerIndex: layerOrder.frontHair,
+      node: <ClothingLayer color={colorOverride ?? item.color} debugLayers={debugLayers} item={item} layerIndex={layerOrder.frontHair} src={item.frontAssetPath} />,
+    });
+    return;
+  }
+
   const layerIndex = getRenderLayerIndex(item);
   const label = getRenderLayerName(item);
   layers.push({
@@ -87,13 +103,13 @@ function addItemLayer(layers: RenderLayer[], item: ClothingItem | undefined, col
   });
 }
 
-function ClothingLayer({ color, debugLayers, item, layerIndex }: { color: RGB; debugLayers: boolean; item: ClothingItem; layerIndex: number }) {
+function ClothingLayer({ color, debugLayers, item, layerIndex, src = item.assetPath }: { color: RGB; debugLayers: boolean; item: ClothingItem; layerIndex: number; src?: string }) {
   return (
     <TintedAsset
       alt={item.name}
       className={`character-layer fitted-layer${item.category === 'hair' ? ' full-frame-layer' : ''}`}
       color={item.category === 'hair' || item.category === 'tops' || item.tags.includes('reference-asset') ? undefined : color}
-      src={item.assetPath}
+      src={src}
       style={{
         ...placementStyle(item.placement),
         clipPath: item.placement.clipPath,

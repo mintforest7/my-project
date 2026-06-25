@@ -424,7 +424,16 @@ const shapes: Record<Category, readonly string[]> = {
   bottoms: bottomReferenceShapes,
   dresses: dressReferenceShapes,
   shoes: shoeReferenceShapes,
-  bags: ['pink-bow-bag', 'purple-tote-bag', 'yellow-heart-bag', 'black-gothic-bag', 'burgundy-shoulder-bag'],
+  bags: [
+    'pink-bow-bag',
+    'purple-tote-bag',
+    'yellow-heart-bag',
+    'black-gothic-bag',
+    'burgundy-shoulder-bag',
+    'blue-denim-tote-bag',
+    'black-lace-tote-bag',
+    'pink-pocket-tote-bag',
+  ],
   glasses: glassesReferenceShapes,
 };
 
@@ -497,23 +506,67 @@ function makeStyle(tags: readonly string[], colors: readonly RGB[], names: Recor
 }
 
 const customReferenceItems: readonly ClothingItem[] = [
+  {
+    id: 'hair_reference_hair_02',
+    name: 'Silky Layered Brown Hair',
+    category: 'hair',
+    color: [105, 70, 54],
+    assetPath: '/assets/style-rush/hair/hair-02-front.png',
+    backAssetPath: '/assets/style-rush/hair/hair-02-back.png',
+    frontAssetPath: '/assets/style-rush/hair/hair-02-front.png',
+    placement: getAssetPlacement('hair', 'hair-02'),
+    layerIndex: getDefaultLayerIndex('hair', 'hair-02'),
+    tags: ['brown', 'layered', 'reference-asset'],
+    price: 0,
+    levelRequired: 1,
+    shape: 'hair-02',
+  },
+  {
+    id: 'hair_reference_hair_04',
+    name: 'Blonde Twin Curls Hair',
+    category: 'hair',
+    color: [186, 160, 132],
+    assetPath: '/assets/style-rush/hair/hair-04.png',
+    placement: getAssetPlacement('hair', 'hair-04'),
+    layerIndex: getDefaultLayerIndex('hair', 'hair-04'),
+    tags: ['blonde', 'curls', 'pigtails', 'reference-asset'],
+    price: 0,
+    levelRequired: 1,
+    shape: 'hair-04',
+  },
+  {
+    id: 'hair_reference_hair_05',
+    name: 'Golden Curly Ponytail Hair',
+    category: 'hair',
+    color: [176, 132, 84],
+    assetPath: '/assets/style-rush/hair/hair-05.png',
+    placement: getAssetPlacement('hair', 'hair-05'),
+    layerIndex: getDefaultLayerIndex('hair', 'hair-05'),
+    tags: ['golden', 'curly', 'ponytail', 'reference-asset'],
+    price: 0,
+    levelRequired: 1,
+    shape: 'hair-05',
+  },
   ...bottomReferenceShapes.map((shape, index) =>
-    makeReferenceItem(`bottoms_reference_${shape}`, bottomReferenceNames[shape] ?? `Styled Bottom ${index + 1}`, 'bottoms', shape, [210, 178, 172]),
+    makeReferenceItem(`bottoms_reference_${shape}`, bottomReferenceNames[shape] ?? fallbackReferenceName('bottoms', index), 'bottoms', shape, [210, 178, 172]),
   ),
   ...dressReferenceShapes.map((shape, index) =>
-    makeReferenceItem(`dresses_reference_${shape}`, dressReferenceNames[index], 'dresses', shape, [232, 190, 202]),
+    makeReferenceItem(`dresses_reference_${shape}`, dressReferenceNames[index] ?? fallbackReferenceName('dresses', index), 'dresses', shape, [232, 190, 202]),
   ),
   ...shoeReferenceShapes.map((shape, index) =>
-    makeReferenceItem(`shoes_reference_${shape}`, shoeReferenceNames[index], 'shoes', shape, [224, 178, 170]),
+    makeReferenceItem(`shoes_reference_${shape}`, shoeReferenceNames[index] ?? fallbackReferenceName('shoes', index), 'shoes', shape, [224, 178, 170]),
   ),
   ...glassesReferenceShapes.map((shape, index) =>
-    makeReferenceItem(`glasses_reference_${shape}`, glassesReferenceNames[index], 'glasses', shape, [190, 174, 150]),
+    makeReferenceItem(`glasses_reference_${shape}`, glassesReferenceNames[index] ?? fallbackReferenceName('glasses', index), 'glasses', shape, [190, 174, 150]),
   ),
   makeReferenceItem('bags_reference_pink_bow_bag', 'Pink Bow Handbag', 'bags', 'pink-bow-bag', [245, 150, 180]),
   makeReferenceItem('bags_reference_purple_tote_bag', 'Purple Tote Bag', 'bags', 'purple-tote-bag', [194, 145, 214]),
   makeReferenceItem('bags_reference_yellow_heart_bag', 'Yellow Heart Bag', 'bags', 'yellow-heart-bag', [255, 205, 24]),
   makeReferenceItem('bags_reference_black_gothic_bag', 'Black Gothic Bag', 'bags', 'black-gothic-bag', [20, 20, 22]),
   makeReferenceItem('bags_reference_burgundy_shoulder_bag', 'Burgundy Shoulder Bag', 'bags', 'burgundy-shoulder-bag', [92, 24, 36]),
+  makeReferenceItem('bags_reference_blue_denim_tote_bag', 'Blue Denim Tote Bag', 'bags', 'blue-denim-tote-bag', [142, 180, 222]),
+  makeReferenceItem('bags_reference_black_lace_tote_bag', 'Black Lace Tote Bag', 'bags', 'black-lace-tote-bag', [18, 18, 18]),
+  makeReferenceItem('bags_reference_pink_pocket_tote_bag', 'Pink Pocket Tote Bag', 'bags', 'pink-pocket-tote-bag', [245, 160, 170]),
 ];
 
 function makeReferenceItem(id: string, name: string, category: Category, shape: string, color: RGB): ClothingItem {
@@ -530,4 +583,19 @@ function makeReferenceItem(id: string, name: string, category: Category, shape: 
     levelRequired: 1,
     shape,
   };
+}
+
+function fallbackReferenceName(category: Category, index: number): string {
+  const names: Record<Category, readonly string[]> = {
+    hair: ['Signature Hair', 'Polished Waves', 'Soft Curls', 'Runway Ponytail'],
+    tops: ['Fitted Fashion Top', 'Ribbon Detail Blouse', 'Soft Knit Top', 'Statement Tee'],
+    bottoms: ['Tailored Fashion Bottom', 'Pleated Style Skirt', 'Soft Denim Bottom', 'Runway Trousers'],
+    dresses: ['Runway Fashion Dress', 'Ribbon Detail Dress', 'Garden Party Dress', 'Soft Satin Dress'],
+    shoes: ['Fashion Doll Shoes', 'Platform Sneakers', 'Ribbon Strap Shoes', 'Classic Campus Shoes'],
+    bags: ['Fashion Handbag', 'Quilted Mini Bag', 'Soft Tote Bag', 'Runway Shoulder Bag'],
+    glasses: ['Round Fashion Glasses', 'Soft Frame Glasses', 'Runway Sunglasses', 'Classic Gold Frames'],
+  };
+
+  const categoryNames = names[category];
+  return categoryNames[index % categoryNames.length];
 }

@@ -8,6 +8,8 @@ export type ClothingItem = {
   category: Category;
   color: RGB;
   assetPath: string;
+  backAssetPath?: string;
+  frontAssetPath?: string;
   placement: AssetPlacement;
   layerIndex: number;
   tags: readonly string[];

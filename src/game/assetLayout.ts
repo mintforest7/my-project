@@ -32,6 +32,9 @@ const bodyAnchors: Record<BodyAnchorName, BodyAnchor> = {
 const fitPresets: Record<Category, Record<string, FitPreset>> = {
   hair: {
     long: slot('fullBody', 92.4, 92.4, 1.19, -3.38),
+    'hair-02': slot('fullBody', 100, 100),
+    'hair-04': slot('fullBody', 100, 100),
+    'hair-05': slot('fullBody', 100, 100),
   },
   tops: {
     'top-06': topSlot(0.48, 0),
@@ -87,6 +90,9 @@ const fitPresets: Record<Category, Record<string, FitPreset>> = {
     'yellow-heart-bag': slot('hands', 25, 21, 24, 0),
     'black-gothic-bag': slot('hands', 27, 21, 24, 2),
     'burgundy-shoulder-bag': slot('hands', 23, 29, 24, -1),
+    'blue-denim-tote-bag': slot('hands', 26, 22, 24, 1),
+    'black-lace-tote-bag': slot('hands', 27, 23, 24, 1),
+    'pink-pocket-tote-bag': slot('hands', 26, 22, 24, 1),
   },
   glasses: {
     'glasses-01': glassesSlot(),
