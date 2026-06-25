@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { User } from '@supabase/supabase-js';
 import { addRewards, defaultPlayer } from '../../game/playerData';
-import { loadCloudPlayer, loadSavedOutfits, saveCloudPlayer, saveOutfit, saveOwnedItem } from '../../game/cloudData';
+import { deleteSavedOutfit, loadCloudPlayer, loadSavedOutfits, saveCloudPlayer, saveOutfit, saveOwnedItem } from '../../game/cloudData';
 import { evaluateFashionJury } from '../../game/aiJury';
 import { getRandomTheme } from '../../game/themes';
 import type { Category, FashionJuryResult, Outfit, PlayerData, RGB, ScreenName, Theme } from '../../game/types';
@@ -154,6 +154,10 @@ export function StyleRushGame({ user }: StyleRushGameProps) {
   const finishRoundLock = useRef(false);
 
   useEffect(() => {
+    setSavedOutfits(loadLocalSavedOutfits(user.id));
+  }, [user.id]);
+
+  useEffect(() => {
     let active = true;
     setCloudReady(false);
     setCloudMessage('Loading cloud save...');
@@ -190,7 +194,7 @@ export function StyleRushGame({ user }: StyleRushGameProps) {
     loadSavedOutfits()
       .then((looks) => {
         if (!active) return;
-        setSavedOutfits(looks);
+        setSavedOutfits((current) => mergeSavedOutfits(looks, current));
       })
       .catch((error: unknown) => {
         if (!active) return;
@@ -322,13 +326,18 @@ export function StyleRushGame({ user }: StyleRushGameProps) {
   async function handleSaveOutfit(): Promise<void> {
     if (savingOutfit) return;
 
+    const localSaved = createLocalSavedOutfit(user.id, `${theme.name} Look`, effectiveOutfit);
+
     try {
       setSavingOutfit(true);
       const saved = await saveOutfit({ name: `${theme.name} Look`, outfit: effectiveOutfit });
-      setSavedOutfits((current) => [saved, ...current.filter((look) => look.id !== saved.id)]);
+      setSavedOutfits((current) => mergeSavedOutfits([saved], current.filter((look) => look.id !== localSaved.id)));
       setCloudMessage('Outfit saved to cloud.');
     } catch (error) {
-      setCloudMessage(error instanceof Error ? error.message : 'Could not save outfit.');
+      const localOutfits = saveLocalSavedOutfit(user.id, localSaved);
+      setSavedOutfits((current) => mergeSavedOutfits(localOutfits, current));
+      const details = error instanceof Error ? ` Cloud error: ${error.message}` : '';
+      setCloudMessage(`Outfit saved to this device.${details}`);
     } finally {
       setSavingOutfit(false);
     }
@@ -350,6 +359,18 @@ export function StyleRushGame({ user }: StyleRushGameProps) {
     setCategory('hair');
     setCloudMessage(`${saved.name} applied.`);
     setScreen('customize');
+  }
+
+  function removeSavedOutfit(saved: SavedOutfit): void {
+    setSavedOutfits((current) => current.filter((look) => look.id !== saved.id));
+    deleteLocalSavedOutfit(user.id, saved.id);
+    setCloudMessage(`${saved.name} deleted.`);
+
+    if (!saved.id.startsWith('local-')) {
+      deleteSavedOutfit(saved.id).catch((error: unknown) => {
+        setCloudMessage(error instanceof Error ? error.message : 'Could not delete cloud outfit.');
+      });
+    }
   }
 
   return (
@@ -434,7 +455,7 @@ export function StyleRushGame({ user }: StyleRushGameProps) {
                 </div>
               </div>
             )}
-            <SavedOutfitCatalog onApply={applySavedOutfit} savedOutfits={savedOutfits} />
+            <SavedOutfitCatalog onApply={applySavedOutfit} onDelete={removeSavedOutfit} savedOutfits={savedOutfits} />
             <div className="category-tabs">
               {categories.map((itemCategory) => (
                 <button
@@ -526,7 +547,6 @@ export function StyleRushGame({ user }: StyleRushGameProps) {
           <p className="eyebrow">{theme.name}</p>
           <h2>Outfit Preview</h2>
           <LayeredCharacter colorOverrides={colorOverrides} debugLayers={debugLayers} outfit={outfit} skinTone={player.skinTone} />
-          <SavedOutfitCatalog compact onApply={applySavedOutfit} savedOutfits={savedOutfits} />
           <div className="button-row">
             <button className="secondary" onClick={() => setScreen('customize')}>Back</button>
             <button className="secondary" disabled={savingOutfit} onClick={handleSaveOutfit}>{savingOutfit ? 'Saving...' : 'Save Outfit'}</button>
@@ -585,7 +605,6 @@ export function StyleRushGame({ user }: StyleRushGameProps) {
                   <button className="secondary" disabled={savingOutfit} onClick={handleSaveOutfit}>{savingOutfit ? 'Saving...' : 'Save Outfit'}</button>
                   <button className="secondary" onClick={() => setScreen('shop')}>Shop</button>
                 </div>
-                <SavedOutfitCatalog compact onApply={applySavedOutfit} savedOutfits={savedOutfits} />
               </>
             ) : (
               <div className="jury-loading">
@@ -658,13 +677,33 @@ export function StyleRushGame({ user }: StyleRushGameProps) {
 function SavedOutfitCatalog({
   compact = false,
   onApply,
+  onDelete,
   savedOutfits,
 }: {
   compact?: boolean;
   onApply: (saved: SavedOutfit) => void;
+  onDelete: (saved: SavedOutfit) => void;
   savedOutfits: readonly SavedOutfit[];
 }) {
+  const [clickCounts, setClickCounts] = useState<Record<string, number>>({});
   const visibleOutfits = savedOutfits.slice(0, 8);
+
+  function handleSavedOutfitClick(saved: SavedOutfit): void {
+    const nextCount = (clickCounts[saved.id] ?? 0) + 1;
+
+    if (nextCount >= 4) {
+      setClickCounts((current) => {
+        const updated = { ...current };
+        delete updated[saved.id];
+        return updated;
+      });
+      onDelete(saved);
+      return;
+    }
+
+    setClickCounts((current) => ({ ...current, [saved.id]: nextCount }));
+    onApply(saved);
+  }
 
   return (
     <div className={compact ? 'saved-outfits-panel compact' : 'saved-outfits-panel'}>
@@ -672,10 +711,11 @@ function SavedOutfitCatalog({
         <strong>Saved Looks Catalog</strong>
         <small>{savedOutfits.length} saved</small>
       </div>
+      <small className="saved-outfits-hint">4 clicks on outfit - delete</small>
       {visibleOutfits.length > 0 ? (
         <div className="saved-outfit-list" aria-label="Saved outfits catalog">
           {visibleOutfits.map((saved) => (
-            <button className="saved-outfit-chip" key={saved.id} onClick={() => onApply(saved)}>
+            <button className="saved-outfit-chip" key={saved.id} onClick={() => handleSavedOutfitClick(saved)}>
               {saved.name}
             </button>
           ))}
@@ -685,6 +725,67 @@ function SavedOutfitCatalog({
       )}
     </div>
   );
+}
+
+function localOutfitsKey(userId: string): string {
+  return `style-rush:saved-outfits:${userId}`;
+}
+
+function loadLocalSavedOutfits(userId: string): SavedOutfit[] {
+  const saved = window.localStorage.getItem(localOutfitsKey(userId));
+  if (!saved) return [];
+
+  try {
+    const parsed = JSON.parse(saved) as SavedOutfit[];
+    return parsed.filter(isSavedOutfit);
+  } catch {
+    return [];
+  }
+}
+
+function saveLocalSavedOutfit(userId: string, outfit: SavedOutfit): SavedOutfit[] {
+  const updated = mergeSavedOutfits([outfit], loadLocalSavedOutfits(userId)).slice(0, 24);
+  window.localStorage.setItem(localOutfitsKey(userId), JSON.stringify(updated));
+  return updated;
+}
+
+function deleteLocalSavedOutfit(userId: string, outfitId: string): void {
+  const updated = loadLocalSavedOutfits(userId).filter((outfit) => outfit.id !== outfitId);
+  window.localStorage.setItem(localOutfitsKey(userId), JSON.stringify(updated));
+}
+
+function createLocalSavedOutfit(userId: string, name: string, outfit: Outfit): SavedOutfit {
+  const createdAt = new Date().toISOString();
+  return {
+    id: `local-${userId}-${Date.now()}`,
+    name,
+    itemIds: Object.fromEntries(
+      categories
+        .map((itemCategory) => [itemCategory, outfit[itemCategory]?.id] as const)
+        .filter((entry): entry is readonly [Category, string] => Boolean(entry[1])),
+    ) as Partial<Record<Category, string>>,
+    createdAt,
+  };
+}
+
+function mergeSavedOutfits(primary: readonly SavedOutfit[], secondary: readonly SavedOutfit[]): SavedOutfit[] {
+  const byId = new Map<string, SavedOutfit>();
+  [...primary, ...secondary].forEach((outfit) => {
+    byId.set(outfit.id, outfit);
+  });
+
+  return Array.from(byId.values()).sort((first, second) => Date.parse(second.createdAt) - Date.parse(first.createdAt));
+}
+
+function isSavedOutfit(value: unknown): value is SavedOutfit {
+  if (!value || typeof value !== 'object') return false;
+
+  const candidate = value as Partial<SavedOutfit>;
+  return typeof candidate.id === 'string'
+    && typeof candidate.name === 'string'
+    && typeof candidate.createdAt === 'string'
+    && Boolean(candidate.itemIds)
+    && typeof candidate.itemIds === 'object';
 }
 
 function rgb(color: readonly [number, number, number]): string {

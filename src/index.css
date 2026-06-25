@@ -587,6 +587,16 @@ h2 {
   font-weight: 800;
 }
 
+.saved-outfits-hint {
+  justify-self: start;
+  padding: 4px 8px;
+  color: #9a617c;
+  border: 1px solid #f0c8d6;
+  border-radius: 999px;
+  background: #fff8fb;
+  text-transform: uppercase;
+}
+
 .saved-outfit-list {
   display: flex;
   gap: 8px;

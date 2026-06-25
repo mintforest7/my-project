@@ -126,6 +126,11 @@ export async function saveOutfit(draft: SavedOutfitDraft): Promise<SavedOutfit> 
   return rowToSavedOutfit(data as SavedOutfitRow);
 }
 
+export async function deleteSavedOutfit(outfitId: string): Promise<void> {
+  const { error } = await supabase.from('saved_outfits').delete().eq('id', outfitId);
+  if (error) throw error;
+}
+
 export async function syncClothingCatalog(items: readonly ClothingItem[]): Promise<void> {
   const rows = items.map((item) => ({
     id: item.id,
