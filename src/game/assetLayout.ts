@@ -89,7 +89,27 @@ const fitPresets: Record<Category, Record<string, FitPreset>> = {
     pleated: slot('hips', 37, 19, 0, -2, skirtMask()),
     plaid: slot('hips', 37, 20, 0, -2, skirtMask()),
   },
-  dresses: {},
+  dresses: {
+    'dress-21': dressSlot(0, -1.61),
+    'dress-22': dressSlot(0, -0.64),
+    'dress-24': dressSlot(1.43, -1.61),
+    'dress-25': dressSlot(2.14, -1.61),
+    'dress-26': dressSlot(3.81, -1.61),
+    'dress-27': dressSlot(2.85, -2.09),
+    'dress-28': dressSlot(1.19, -2.74),
+    'dress-29': dressSlot(0.96, -2.9),
+    'dress-30': dressSlot(4.76, -1.61),
+    'dress-31': dressSlot(3.1, -1.61),
+    'dress-32': dressSlot(1.43, -2.26),
+    'dress-33': dressSlot(1.67, -2.42),
+    'dress-34': dressSlot(1.67, -1.29),
+    'dress-35': dressSlot(1.9, 0, 0.93),
+    'dress-36': dressSlot(0, 0, 1.04),
+    'dress-37': dressSlot(1.19, -1.61),
+    'dress-38': dressSlot(1.19, -1.61),
+    'dress-39': dressSlot(0, 0, 1.07),
+    'dress-40': dressSlot(1.9, -1.13, 0.95),
+  },
   shoes: {},
   bags: {
     'pink-bow-bag': slot('hands', 25, 21, 24, 0),
@@ -148,8 +168,8 @@ function topSlot(offsetX = 0, offsetY = 0): FitPreset {
   return slot('chest', 31.81, 30.45, 0.12 + offsetX, -2.29 + offsetY, upperBodyMask());
 }
 
-function dressSlot(): FitPreset {
-  return slot('fullBody', 31.32, 43.56, 0.12, 4.35);
+function dressSlot(offsetX = 0, offsetY = 0, scale = 1): FitPreset {
+  return slot('fullBody', 31.32 * scale, 43.56 * scale, -1.07 + offsetX, -8.55 + offsetY);
 }
 
 function glassesSlot(): FitPreset {

@@ -434,21 +434,7 @@ export function StyleRushGame({ user }: StyleRushGameProps) {
                 </div>
               </div>
             )}
-            {savedOutfits.length > 0 && (
-              <div className="saved-outfits-panel">
-                <div>
-                  <strong>Saved Looks</strong>
-                  <small>Wear again in any round</small>
-                </div>
-                <div className="saved-outfit-list">
-                  {savedOutfits.slice(0, 6).map((saved) => (
-                    <button className="saved-outfit-chip" key={saved.id} onClick={() => applySavedOutfit(saved)}>
-                      {saved.name}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
+            <SavedOutfitCatalog onApply={applySavedOutfit} savedOutfits={savedOutfits} />
             <div className="category-tabs">
               {categories.map((itemCategory) => (
                 <button
@@ -540,6 +526,7 @@ export function StyleRushGame({ user }: StyleRushGameProps) {
           <p className="eyebrow">{theme.name}</p>
           <h2>Outfit Preview</h2>
           <LayeredCharacter colorOverrides={colorOverrides} debugLayers={debugLayers} outfit={outfit} skinTone={player.skinTone} />
+          <SavedOutfitCatalog compact onApply={applySavedOutfit} savedOutfits={savedOutfits} />
           <div className="button-row">
             <button className="secondary" onClick={() => setScreen('customize')}>Back</button>
             <button className="secondary" disabled={savingOutfit} onClick={handleSaveOutfit}>{savingOutfit ? 'Saving...' : 'Save Outfit'}</button>
@@ -598,6 +585,7 @@ export function StyleRushGame({ user }: StyleRushGameProps) {
                   <button className="secondary" disabled={savingOutfit} onClick={handleSaveOutfit}>{savingOutfit ? 'Saving...' : 'Save Outfit'}</button>
                   <button className="secondary" onClick={() => setScreen('shop')}>Shop</button>
                 </div>
+                <SavedOutfitCatalog compact onApply={applySavedOutfit} savedOutfits={savedOutfits} />
               </>
             ) : (
               <div className="jury-loading">
@@ -664,6 +652,38 @@ export function StyleRushGame({ user }: StyleRushGameProps) {
         </section>
       )}
     </main>
+  );
+}
+
+function SavedOutfitCatalog({
+  compact = false,
+  onApply,
+  savedOutfits,
+}: {
+  compact?: boolean;
+  onApply: (saved: SavedOutfit) => void;
+  savedOutfits: readonly SavedOutfit[];
+}) {
+  const visibleOutfits = savedOutfits.slice(0, 8);
+
+  return (
+    <div className={compact ? 'saved-outfits-panel compact' : 'saved-outfits-panel'}>
+      <div>
+        <strong>Saved Looks Catalog</strong>
+        <small>{savedOutfits.length} saved</small>
+      </div>
+      {visibleOutfits.length > 0 ? (
+        <div className="saved-outfit-list" aria-label="Saved outfits catalog">
+          {visibleOutfits.map((saved) => (
+            <button className="saved-outfit-chip" key={saved.id} onClick={() => onApply(saved)}>
+              {saved.name}
+            </button>
+          ))}
+        </div>
+      ) : (
+        <p className="saved-outfits-empty">Press Save Outfit after a look is ready, and it will appear here.</p>
+      )}
+    </div>
   );
 }
 
